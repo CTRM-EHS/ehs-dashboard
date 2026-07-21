@@ -496,7 +496,7 @@
 <div id="docmodal"><div class="lm-box">
   <div class="lm-head"><b>📄 지침서 원문</b><button class="lm-x" onclick="closeDocModal()">×</button></div>
   <div class="lm-body" id="doc-body"></div>
-  <div class="lm-foot"><span style="font-size:11px;color:var(--muted)">사내 지침서 · SharePoint 문서함 원문</span></div>
+  <div class="lm-foot"><span style="font-size:11px;color:var(--muted)">지침서 원문 발췌·요약 · 전문은 '원문 열기 ↗'</span></div>
 </div></div>
 <div id="recmodal"><div class="lm-box">
   <div class="lm-head"><b id="rm-title">기록 상세</b><button class="lm-x" onclick="closeRecModal()">×</button></div>
@@ -1997,12 +1997,28 @@
   function closeLawModal(){document.getElementById('lawmodal').classList.remove('show');}
   document.getElementById('lawmodal').addEventListener('click',e=>{if(e.target.id==='lawmodal')closeLawModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLawModal();});
+  // 지침서 핵심 내용(원문 발췌·요약) — 원문: SharePoint I-EHS-04 안전보건 운영관리 지침 Rev.3
+  const DOC_INFO={
+    'I-EHS-04':{ name:'I-EHS-04 안전보건 운영관리 지침 (Rev.3)',
+      meta:'제정 2021.12.21 · 검토주기 12개월(정기) · 관리부문 EHS팀',
+      arts:[
+        ['적용범위','사업장 內 전 부서. 안전보건 운영관리 — 순회점검·점검개선, 안전보건협의체, 도급 관리 등 전반을 다룬다.'],
+        ['순회·안전 점검','정기 순회점검 및 자체 점검을 계획·실시하고, 점검 결과를 점검표에 기록·관리한다.'],
+        ['지적사항·시정조치','점검·의결로 시정 통보를 받은 부서는 통보받은 날로부터 7일 이내에 시정조치보고서를 작성·제출하고, 조치를 완료한 뒤 보고한다.'],
+        ['개선 확인·결과 보고','EHS팀은 시정·개선 완료 결과를 종합(개선현황 관리)하여 보고한다.'],
+        ['기록관리','본 지침 관련 기록은 기록관리 프로세스에 따라 보관한다.']
+      ]}
+  };
   function showDocModal(code,gov,name){
     var body=document.getElementById('doc-body');
     var e2=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
-    body.innerHTML='<div class="lm-law"><div class="lm-ln">'+e2(code)
-      +'<button class="btn ghost sm" style="margin-left:8px;vertical-align:middle;font-size:10px;padding:3px 8px" onclick="openDoc(\''+code+'\')">원문 보기 ↗</button></div>'
-      +'<div class="lm-eff">'+e2(gov)+'</div></div>';
+    var info=DOC_INFO[code];
+    var btn='<button class="btn ghost sm" style="margin-left:8px;vertical-align:middle;font-size:10px;padding:3px 8px" onclick="openDoc(\''+code+'\')">원문 열기 ↗</button>';
+    var h='<div class="lm-law"><div class="lm-ln">'+e2(info?info.name:code)+btn+'</div>';
+    h+='<div class="lm-eff">'+e2(info?info.meta:gov)+'</div>';
+    if(info){ h+=info.arts.map(function(a){return '<div class="lm-art"><span class="an">'+e2(a[0])+'</span><div class="lm-txt">'+e2(a[1])+'</div></div>';}).join(''); }
+    h+='</div>';
+    body.innerHTML=h;
     document.getElementById('docmodal').classList.add('show');
   }
   function closeDocModal(){document.getElementById('docmodal').classList.remove('show');}
