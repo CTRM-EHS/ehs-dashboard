@@ -1,0 +1,1 @@
+window.STD_DATA = {"안전점검순찰":{"law":"산업안전보건법","docs":"I-EHS-04","memo":"I-EHS-04 안전보건 운영관리 지침 Rev.3 (순회점검·점검개선)","p3":"https://p3.ctr.co.kr/entities/019f1780-4797-7698-86c1-2663ba7c5cf4"},"중처법 체계":{"law":"중대재해처벌법 · 산업안전보건법","docs":"I-EHS-01","memo":"중대재해처벌법 · 안전보건관리체계(I-EHS-01~12 전반)","p3":"https://p3.ctr.co.kr/entities/019f1780-543d-7145-9825-2262d251adc1"}};
