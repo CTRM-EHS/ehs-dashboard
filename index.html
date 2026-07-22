@@ -1529,16 +1529,22 @@
     const cyc=CYCLE[name];
     const cycChip = cyc ? '<span class="pill b">🔁 이행주기: '+cyc+'</span>' : '<span class="pill" style="background:#eef1f5;color:#788699">이행주기: 비정기/수시</span>';
     let govChip, govNote;
-    if(d.v==='confirmed'){ govChip='<span class="pill g">✔ 지침서 원문 확인 · '+d.gov+'</span>'; govNote='지침서 원문 기준'; }
-    else if(d.v==='na'){ govChip='<span class="pill" style="background:#f0e9fb;color:#7a3fb0">⊘ 해당 없음/정의만 · '+(d.gov||'')+'</span>'; govNote='적용 여부 검토 필요'; }
-    else if(d.v==='law'){ govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미포함 ('+(d.gov||'')+')</span>'; govNote='법령 기준(사내 절차 없음)'; }
-    else if((d.gov||'').indexOf('I-EHS')>=0){ govChip='<span class="pill b">📄 지침서 존재 · 원문 미대조 ('+d.gov+')</span>'; govNote='표준 단계(원문 미대조)'; }
-    else { govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미확인'+(d.gov?' ('+d.gov+')':'')+'</span>'; govNote='표준 단계(미확인)'; }
-    const gv=(d.gov||'').replace(/'/g,"");
+    // 기준정보(std) 확정값을 항목 상세에 반영: 메모=근거(gov), 법령, 절차서(docs) 오버라이드 우선
+    const _sov=stdOvAll()[name]||{};
+    const egov=(_sov.memo!=null&&_sov.memo!=='')?_sov.memo:(d.gov||'');
+    const elaw=_sov.law||'';
+    const edocs=_sov.docs||'';
+    if(d.v==='confirmed'){ govChip='<span class="pill g">✔ 지침서 원문 확인 · '+egov+'</span>'; govNote='지침서 원문 기준'; }
+    else if(d.v==='na'){ govChip='<span class="pill" style="background:#f0e9fb;color:#7a3fb0">⊘ 해당 없음/정의만 · '+egov+'</span>'; govNote='적용 여부 검토 필요'; }
+    else if(d.v==='law'){ govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미포함 ('+egov+')</span>'; govNote='법령 기준(사내 절차 없음)'; }
+    else if(egov.indexOf('I-EHS')>=0){ govChip='<span class="pill b">📄 지침서 존재 · 원문 미대조 ('+egov+')</span>'; govNote='표준 단계(원문 미대조)'; }
+    else { govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미확인'+(egov?' ('+egov+')':'')+'</span>'; govNote='표준 단계(미확인)'; }
+    const gv=egov.replace(/'/g,"");
     const nm=(curItem||'').replace(/'/g,"");
-    const lawChip='<span class="pill" style="cursor:pointer;background:#e6effd;color:#2159c9" onclick="showLawModal(\''+gv+'\',\''+nm+'\')">📖 관련법령 보기 ›</span>';
+    const lawCtx=(egov+' '+elaw).replace(/'/g,"");
+    const lawChip='<span class="pill" style="cursor:pointer;background:#e6effd;color:#2159c9" onclick="showLawModal(\''+lawCtx+'\',\''+nm+'\')">📖 관련법령 보기 ›</span>';
     const p3Chip = '<span id="d-p3chips">'+p3ChipsHTML(name)+'</span>';
-    const codes=(d.gov||'').match(/I-EHS-\d+/g);
+    const codes=(egov+' '+edocs).match(/I-EHS-\d+/g);
     if(codes){ const c=codes[0];
       govChip='<span onclick="showDocModal(\''+c+'\',\''+gv+'\',\''+nm+'\')" style="cursor:pointer" title="지침서 원문 팝업">'+govChip+'</span>'; }
     document.getElementById('d-meta').innerHTML = cycChip + govChip + lawChip + p3Chip;
