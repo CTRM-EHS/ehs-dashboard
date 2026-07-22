@@ -1956,7 +1956,7 @@
               +'<td><span class="pill" style="background:#2159c9;color:#fff;font-size:10px">편집중</span></td>'
               +'<td style="white-space:nowrap"><button class="btn sm" onclick="stdSave(\''+nq+'\')">저장</button> <button class="btn ghost sm" onclick="stdCancel()">취소</button></td></tr>';
           } else {
-            var stat = ov ? '<span class="pill g" style="font-size:10px">확정</span>' : '<span class="pill a" style="font-size:10px">대기</span>';
+            var stat = ov ? '<span class="pill g" style="font-size:10px">확정</span>' : '<span class="pill a" style="font-size:10px">확정 대기</span>';
             var mgmt = '<button class="btn ghost sm" onclick="stdEdit(\''+nq+'\')">수정</button>'
                      + (ov ? ' <button class="btn ghost sm" onclick="stdReset(\''+nq+'\')" title="초안으로">↺</button>' : '');
             var p3v=stdEffP3(name); var p3cell = p3v ? '<a href="'+p3v+'" target="_blank" rel="noopener" class="pill" style="text-decoration:none;background:#eaf7ee;color:#1f8a4c">🗂 열기 ›</a>' : '<span class="tag">—</span>';
@@ -1969,7 +1969,7 @@
       });
       if(!rows) return;
       out+='<div class="ghead" style="margin:'+ (out?'18px':'2px') +' 0 6px"><span class="swatch" style="background:'+domClr+'"></span> '+domName+'</div>'
-        +'<table><thead><tr><th style="width:52px">그룹</th><th style="width:148px">항목</th><th style="width:160px">관련 법령</th><th style="width:148px">관련 절차서</th><th style="width:58px;text-align:center;white-space:nowrap">P3</th><th>현행 근거 메모</th><th style="width:56px;text-align:center;white-space:nowrap">상태</th><th style="width:88px;white-space:nowrap">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
+        +'<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:210px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:62px;text-align:center;white-space:nowrap">P3</th><th style="width:200px">현행 근거 메모</th><th style="width:84px;text-align:center;white-space:nowrap">상태</th><th style="width:92px;white-space:nowrap">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
     });
     var tb='<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn ghost sm" onclick="stdExport()" title="확정한 기준을 파일로 내보내 공유·유지(담당 확인용)">💾 확정본 내보내기(std_data.js)</button></div>';
     host.innerHTML=tb+(out||'<p class="tag">검색 결과 없음</p>');
