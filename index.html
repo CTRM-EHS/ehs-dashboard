@@ -1969,7 +1969,7 @@
       });
       if(!rows) return;
       out+='<div class="ghead" style="margin:'+ (out?'18px':'2px') +' 0 6px"><span class="swatch" style="background:'+domClr+'"></span> '+domName+'</div>'
-        +'<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:210px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:62px;text-align:center;white-space:nowrap">P3</th><th style="width:200px">현행 근거 메모</th><th style="width:84px;text-align:center;white-space:nowrap">상태</th><th style="width:92px;white-space:nowrap">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
+        +'<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:210px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:80px;text-align:center;white-space:nowrap">P3 태스크</th><th style="width:182px">현행 근거 메모</th><th style="width:84px;text-align:center;white-space:nowrap">상태</th><th style="width:92px;white-space:nowrap">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
     });
     var tb='<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn ghost sm" onclick="stdExport()" title="확정한 기준을 파일로 내보내 공유·유지(담당 확인용)">💾 확정본 내보내기(std_data.js)</button></div>';
     host.innerHTML=tb+(out||'<p class="tag">검색 결과 없음</p>');
