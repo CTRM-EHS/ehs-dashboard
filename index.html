@@ -1465,7 +1465,7 @@
     const body = cats.length ? cats.map(function(k){ const lbl=CJC_CAT[k]||k;
       return '<div style="border:1px solid #e2e7ee;border-radius:8px;padding:10px 12px;margin-bottom:8px"><b style="font-size:12.5px">'+esc(lbl)+'</b><p style="font-size:11.5px;color:#b06a2c;margin:6px 0 0">근거자료 미지정 — 소스 지정 후 문서 연결 예정</p></div>';
     }).join('') : '<p style="font-size:12px;color:var(--muted)">연결된 근거자료 분류가 없습니다.</p>';
-    cjcModal('<div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><h3 style="margin:0;font-size:15px">근거자료 · '+esc(it.t)+'</h3><button class="btn ghost sm" onclick="cjcClose()">닫기</button></div><div style="font-size:11.5px;color:var(--muted);margin:6px 0 10px">사업장 <b>'+site+'공장</b> · 기준 반기 <b>'+CJC_HALF_LABEL+'</b></div>'+body+'<p style="font-size:10.5px;color:var(--muted);margin-top:8px">※ 근거자료 소스는 추후 지정합니다. 현재는 의무별 근거자료 분류(필드)만 표시.</p>');
+    cjcModal('<div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><h3 style="margin:0;font-size:15px">근거자료 · '+esc(it.t)+'</h3><button class="btn ghost sm" onclick="cjcClose()">닫기</button></div><div style="font-size:11.5px;color:var(--muted);margin:6px 0 10px">사업장 <b>'+site+'공장</b> · 기준 반기 <b>'+CJC_HALF_LABEL+'</b></div>'+body+'<div style="margin-top:12px"><a href="https://ctrcentral.sharepoint.com/sites/200/Shared Documents/EHS팀_협업공간/00. EHS팀(공통)/중처법(26\' 상 이후)/26년 상반기 보고자료/★개체" target="_blank" rel="noopener" style="text-decoration:none"><button class="btn sm">📁 ★개체 근거자료 폴더 열기 (협업공간)</button></a></div><p style="font-size:10.5px;color:var(--muted);margin-top:8px">※ 근거자료는 협업공간(EHS팀_협업공간)의 ★개체 폴더에서 의무별·공장별로 확인하세요.</p>');
   }
   function cjcReport(){
     const site=cjcSite; let done=0,total=0; let rows='';
@@ -1488,7 +1488,9 @@
   function cjcStatus(hi,ii){ const rec=(cjcLoad()[cjcKey(hi,ii)]||{}).ans; if(!rec||!rec.length) return {c:'#d3d8e0',t:'미실시'}; if(rec.some(v=>v==='부적합')) return {c:'#e35d54',t:'부적합 있음'}; if(rec.some(v=>!v)) return {c:'#f2a83b',t:'작성중'}; return {c:'#25b46a',t:'적합'}; }
   function cjcModal(html){ let m=document.getElementById('cjc-ov'); if(!m){ m=document.createElement('div'); m.id='cjc-ov'; m.style.cssText='position:fixed;inset:0;background:rgba(20,25,40,.45);z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:32px 16px'; m.addEventListener('click',function(e){if(e.target===m)cjcClose();}); document.body.appendChild(m);} m.innerHTML='<div style="background:#fff;border-radius:12px;max-width:760px;width:100%;padding:20px 24px;box-shadow:0 20px 60px rgba(0,0,0,.3)">'+html+'</div>'; m.style.display='flex'; }
   function cjcClose(){ const m=document.getElementById('cjc-ov'); if(m)m.style.display='none'; }
-  function cjcGuide(hi,ii){ const it=CJC[hi].items[ii]; cjcModal('<div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><h3 style="margin:0;font-size:15px">가이드 · '+esc(it.t)+'</h3><button class="btn ghost sm" onclick="cjcClose()">닫기</button></div><div style="margin-top:12px;background:#eef4ff;border:1px solid #cfe0fb;border-radius:8px;padding:12px;font-size:12.5px;color:#1b3a6b">'+esc(CJC_LAW[CJC[hi].ho])+'</div><p style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7">이 의무의 상세 실행방법·작성예시는 고용노동부 「경영책임자와 관리자가 알아야 할 중대재해처벌법 따라하기」(2022) 및 사내 절차서(I-EHS-01~12)를 참조하세요. (되고세이퍼 가이드 원문은 해당 지침서 이미지로, 저작권상 여기 복제하지 않습니다.)</p>'); }
+  function cjcGuide(hi,ii){ const it=CJC[hi].items[ii];
+    var list=it.c.map(function(q){return '<li style="margin-bottom:6px">'+esc(q)+'</li>';}).join('');
+    cjcModal('<div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><h3 style="margin:0;font-size:15px">가이드 · '+esc(it.t)+'</h3><button class="btn ghost sm" onclick="cjcClose()">닫기</button></div><div style="margin-top:12px;background:#eef4ff;border:1px solid #cfe0fb;border-radius:8px;padding:12px;font-size:12.5px;color:#1b3a6b">'+esc(CJC_LAW[CJC[hi].ho])+'</div><div style="font-size:12.5px;font-weight:700;margin:14px 0 6px">이행 확인사항 · 실행방법</div><ul style="font-size:12.5px;line-height:1.75;color:#2b3440;padding-left:18px;margin:0">'+list+'</ul>'+(it.b?'<div style="font-size:11.5px;color:#b06a2c;margin-top:8px">※ '+esc(it.b)+'</div>':'')+'<p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">근거: 고용노동부 「경영책임자와 관리자가 알아야 할 중대재해처벌법 따라하기」(2022) · 사내 절차서(I-EHS-01~12). 상세 작성예시는 원문 안내서 참조.</p>'); }
   function cjcSelf(hi,ii){ const it=CJC[hi].items[ii]; const saved=(cjcLoad()[cjcKey(hi,ii)]||{}).ans||[];
     const rows=it.c.map(function(q,qi){ const cur=saved[qi]||''; const opt=function(v,col){return '<label style="margin-left:10px;font-size:12px;cursor:pointer;white-space:nowrap"><input type="radio" name="cjcq'+qi+'" value="'+v+'" '+(cur===v?'checked':'')+'> <span style="color:'+col+'">'+v+'</span></label>';}; return '<tr><td style="font-size:12px;padding:7px 8px">'+(qi+1)+'. '+esc(q)+'</td><td style="white-space:nowrap;text-align:right;padding:7px 8px">'+opt('적합','#1f9e57')+opt('부적합','#e35d54')+opt('해당없음','#788699')+'</td></tr>';}).join('');
     cjcModal('<div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><h3 style="margin:0;font-size:15px">자가진단 · '+esc(it.t)+'</h3><button class="btn ghost sm" onclick="cjcClose()">닫기</button></div><div style="font-size:11px;color:var(--muted);margin:6px 0 8px">각 문항을 적합/부적합/해당없음으로 진단하세요.</div><table><tbody>'+rows+'</tbody></table><div style="text-align:right;margin-top:14px"><button class="btn" onclick="cjcSaveSelf('+hi+','+ii+','+it.c.length+')">진단 저장</button></div>'); }
@@ -1511,7 +1513,7 @@
       });
       out+='</tbody></table>';
     });
-    out+='<div style="font-size:11px;color:var(--muted);margin-top:12px">※ 되고세이퍼 「중대재해처벌법 이행현황」(중대산업재해) 구조 반영. 자가진단은 사업장별로 저장(브라우저)되어 공장별 이행상태를 구분 표시합니다. 가이드 상세는 고용노동부 지침서. 근거자료는 의무별 분류(필드)만 우선 구성했고 실제 문서 소스는 추후 지정. 시민재해는 제외.</div>';
+    out+='<div style="font-size:11px;color:var(--muted);margin-top:12px">※ 되고세이퍼 「중대재해처벌법 이행현황」(중대산업재해) 구조 반영. 자가진단은 사업장별로 저장(브라우저)되어 공장별 이행상태를 구분 표시합니다. 가이드는 의무별 이행 확인사항(실행방법), 근거자료는 협업공간 ★개체 폴더(의무별·공장별)와 연결. 시민재해는 제외.</div>';
     out+='</div>';
     return out;
   }
@@ -1566,7 +1568,11 @@
       return;
     }
     if(name==='중처법 체계'){
-      ['d-flowcard','d-tabbar','d-tabcard','d-site'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+      ['d-tabbar','d-tabcard','d-site'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+      const fc=document.getElementById('d-flowcard'); if(fc)fc.style.display='';
+      document.getElementById('d-flow').innerHTML=d.flow.map((s,i)=>
+        `<div class="fstep"><div class="sn">STEP ${s[0]}</div><div class="st">${s[1]}</div></div>`+
+        (i<d.flow.length-1?'<div class="farrow">▶</div>':'')).join('');
       const c=document.getElementById('d-custom'); if(c){c.style.display=''; c.innerHTML=cjcHTML();}
       document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('on'));
       document.getElementById('detail').classList.add('on');
