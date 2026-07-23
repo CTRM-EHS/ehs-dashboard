@@ -1534,11 +1534,11 @@
     const egov=(_sov.memo!=null&&_sov.memo!=='')?_sov.memo:(d.gov||'');
     const elaw=_sov.law||'';
     const edocs=_sov.docs||'';
-    if(d.v==='confirmed'){ govChip='<span class="pill g">✔ 지침서 원문 확인 · '+egov+'</span>'; govNote='지침서 원문 기준'; }
+    const govLabel=(DOC_INFO[name]&&DOC_INFO[name].name)?DOC_INFO[name].name:egov;
+    const hasDoc=/I-EHS-\d+/.test(egov+' '+edocs);
+    if(d.v==='confirmed'||hasDoc){ govChip='<span class="pill g">✔ 지침서 원문 확인 · '+govLabel+'</span>'; govNote='지침서 원문 기준'; }
     else if(d.v==='na'){ govChip='<span class="pill" style="background:#f0e9fb;color:#7a3fb0">⊘ 해당 없음/정의만 · '+egov+'</span>'; govNote='적용 여부 검토 필요'; }
-    else if(d.v==='law'){ govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미포함 ('+egov+')</span>'; govNote='법령 기준(사내 절차 없음)'; }
-    else if(egov.indexOf('I-EHS')>=0){ govChip='<span class="pill b">📄 지침서 존재 · 원문 미대조 ('+egov+')</span>'; govNote='표준 단계(원문 미대조)'; }
-    else { govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미확인'+(egov?' ('+egov+')':'')+'</span>'; govNote='표준 단계(미확인)'; }
+    else { govChip='<span class="pill a">⚖ 법령 기준 · 사내 절차서 미포함'+((elaw||egov)?' ('+(elaw||egov)+')':'')+'</span>'; govNote='법령 기준(사내 절차 없음)'; }
     const gv=egov.replace(/'/g,"");
     const nm=(curItem||'').replace(/'/g,"");
     const lawCtx=(egov+' '+elaw).replace(/'/g,"");
@@ -1777,7 +1777,7 @@
             ['제36조','위험성평가 실시 — 유해·위험요인을 찾아 부상·질병 가능성과 중대성을 추정·결정하고 감소대책 수립·실행.'],
             ['제29조','근로자 안전보건교육(정기·채용시·작업내용 변경시·특별교육) 실시.'],
             ['제125조','작업환경측정 — 소음·분진·화학물질 등 유해인자 측정·평가.'],
-            ['제129~130조','일반·특수 건강진단 실시.']]},
+            ['제129~135조(건강진단)','일반건강진단(제129조), 특수·배치전·수시 건강진단(제130·131조), 결과 통보 및 사후관리(제132조), 근로자 준수사항(제133조), 건강진단기관 지정(제134·135조).']]},
     '중대재해처벌법':{name:'중대재해 처벌 등에 관한 법률',eff:'시행 2022.1.27. · 법률 제17907호',
       arts:[['제4조','사업주·경영책임자의 안전보건 확보의무 — 안전보건관리체계 구축·이행 등 9대 의무.'],
             ['제6조','중대산업재해 발생 시 사업주·경영책임자 처벌(사망 시 1년 이상 징역 또는 10억원 이하 벌금).']]},
