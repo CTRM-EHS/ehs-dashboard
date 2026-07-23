@@ -455,13 +455,13 @@
         </div>
 
         <div class="tabbar" id="d-tabbar">
-          <button class="tab on" data-t="files" onclick="dTab('files')">관련 파일 <span id="c-files"></span></button>
+          <button class="tab on" data-t="files" onclick="dTab('files')">관련 폴더 <span id="c-files"></span></button>
         </div>
         <div class="card" style="border-top-left-radius:0" id="d-tabcard">
           <div class="tabpane on" id="pane-files">
             <div id="d-folder"></div>
             <table>
-              <thead><tr><th style="width:44px"></th><th>파일명</th><th style="width:70px">구분</th><th>메모</th><th style="width:56px">공장</th><th style="width:64px">수정</th><th style="width:64px"></th></tr></thead>
+              <thead><tr><th style="width:34px"></th><th style="width:230px">폴더/파일명</th><th style="width:76px">구분</th><th>메모</th><th style="width:52px">공장</th><th style="width:68px"></th></tr></thead>
               <tbody id="d-files"></tbody>
             </table>
             <div id="d-saved"></div>
@@ -862,7 +862,7 @@
       flow:F('순회계획|','점검 실시|','지적사항 등록|','시정 이관|','결과 보고|')},
     '특수건강검진관리':{desc:'유해인자 노출 근로자 특수건강진단 대상·주기·결과 관리.',gov:'산업안전보건법 제130조',v:'law',
       flow:F('작업환경측정 실시 및 유해인자 확인','특수건강진단 대상자 선정','검진계획 수립 및 특수건강진단 실시','결과 확인 및 유소견자 사후관리','결과 보관 및 이력관리'),
-      files:[['작업환경측정 (모든 문서)','-','2026','공통','https://ctrcentral.sharepoint.com/sites/93/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2F93%2FShared%20Documents%2FCTR%20M%20EHS%ED%8C%80%2F02%2E%20H%28Health%29%2F02%2E%20%EC%9E%91%EC%97%85%ED%99%98%EA%B2%BD%EC%B8%A1%EC%A0%95&viewid=91da2876%2Dbd57%2D41b2%2D9a68%2De00ae5277b31',''],['MSDS 화학물질 관리대장','-','2026','공통','https://ctr-chem-msds.netlify.app/',''],['건강검진','-','2026','공통','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진',''],['특수 사후관리소견서','-','2026','울산','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진/01. 정기건강검진/01. 울산/2026/사후관리소견서',''],['특수 사후관리소견서','-','2026','서산','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진/01. 정기건강검진/02. 서산/2026/사후관리소견서',''],['특수 사후관리소견서','-','2026','대구','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진/01. 정기건강검진/03. 대구/2026/사후관리소견서','']]},
+      files:[['작업환경측정 (모든 문서)','측정','2026','공통','https://ctrcentral.sharepoint.com/sites/93/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2F93%2FShared%20Documents%2FCTR%20M%20EHS%ED%8C%80%2F02%2E%20H%28Health%29%2F02%2E%20%EC%9E%91%EC%97%85%ED%99%98%EA%B2%BD%EC%B8%A1%EC%A0%95&viewid=91da2876%2Dbd57%2D41b2%2D9a68%2De00ae5277b31',''],['MSDS 화학물질 관리대장','-','2026','공통','https://ctr-chem-msds.netlify.app/',''],['건강검진','검진','2026','공통','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진',''],['특수 사후관리소견서','소견서','2026','울산','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진/01. 정기건강검진/01. 울산/2026/사후관리소견서',''],['특수 사후관리소견서','소견서','2026','서산','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진/01. 정기건강검진/02. 서산/2026/사후관리소견서',''],['특수 사후관리소견서','소견서','2026','대구','https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/02. H(Health)/03. 건강검진/01. 정기건강검진/03. 대구/2026/사후관리소견서','']]},
     '공정(작업)사용현황':{desc:'공정·작업별 화학물질 사용현황 관리(MSDS 연계).',gov:'화학물질관리법 · 산업안전보건법',v:'law',
       flow:F('공정 정의|','사용물질 매핑|MSDS','사용량 관리|','노출평가 연계|','갱신|')}
   });
@@ -889,11 +889,15 @@
     const all=d.files||[];
     const files=all.filter(f=>{const pl=f[3]||'공통'; return pl==='공통'||curPlant==='전체'||pl===curPlant;});
     document.getElementById('c-files').textContent = all.length ? '('+files.length+(files.length!==all.length?'/'+all.length:'')+')' : '';
-    document.getElementById('d-files').innerHTML = files.length ? files.map(f=>{const t=ft(f[0]);const pl=f[3]||'공통';const url=f[4]||'';const memo=f[5]||'';const badge=(t&&t!=='etc')?`<span class="filetype ft-${t}">${t.toUpperCase()}</span>`:'';
-      const openBtn = url ? `<button class="btn ghost sm" onclick="window.open('${url.replace(/'/g,"%27")}','_blank')">열기 ↗</button>` : `<button class="btn ghost sm" disabled title="링크 연동 예정" style="opacity:.5;cursor:default">열기</button>`;
-      return `<tr><td>${badge}</td><td>${f[0]}</td><td>${f[1]}</td><td class="tag" style="color:var(--muted)">${memo||'—'}</td><td><span class="pill" style="background:#eef1f5;color:#5a6675">${pl}</span></td><td>${f[2]}</td><td style="text-align:right">${openBtn}</td></tr>`;}).join('')
-      : `<tr><td colspan="7" style="color:var(--muted)">${all.length? '선택한 공장('+curPlant+')에 해당 파일이 없습니다': (d.folder? '개별 파일 목록은 위 SharePoint 폴더에서 확인하세요.':'관련 파일 연동 예정입니다.')}</td></tr>`;
+    document.getElementById('d-files').innerHTML = files.length ? files.map(f=>{const t=ft(f[0]);const pl=f[3]||'공통';const url=f[4]||'';const badge=(t&&t!=='etc')?`<span class="filetype ft-${t}">${t.toUpperCase()}</span>`:'';const memo=fmemoGet(url)||(f[5]||'');
+      const openBtn = url ? `<button class="btn ghost sm" style="white-space:nowrap" onclick="window.open('${url.replace(/'/g,"%27")}','_blank')">열기 ↗</button>` : `<button class="btn ghost sm" disabled title="링크 연동 예정" style="opacity:.5;cursor:default;white-space:nowrap">열기</button>`;
+      const memoIn = `<input value="${String(memo).replace(/"/g,'&quot;')}" onchange="fmemoSet('${url.replace(/'/g,"%27")}',this.value)" placeholder="메모 입력" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:11.5px">`;
+      return `<tr><td>${badge}</td><td>${f[0]}</td><td>${f[1]}</td><td>${memoIn}</td><td><span class="pill" style="background:#eef1f5;color:#5a6675">${pl}</span></td><td style="text-align:right;white-space:nowrap">${openBtn}</td></tr>`;}).join('')
+      : `<tr><td colspan="6" style="color:var(--muted)">${all.length? '선택한 공장('+curPlant+')에 해당 항목이 없습니다': (d.folder? '개별 항목은 위 SharePoint 폴더에서 확인하세요.':'관련 폴더 연동 예정입니다.')}</td></tr>`;
   }
+  function fmemoAll(){try{return JSON.parse(localStorage.getItem('ehs_file_memo'))||{};}catch(e){return{};}}
+  function fmemoGet(url){return fmemoAll()[(curItem||'')+'|'+url]||'';}
+  function fmemoSet(url,v){var o=fmemoAll();var k=(curItem||'')+'|'+url; if(v&&v.trim())o[k]=v.trim(); else delete o[k]; try{localStorage.setItem('ehs_file_memo',JSON.stringify(o));}catch(e){} }
   function onPlant(){ const el=document.getElementById('plantSel'); if(!el)return; curPlant=el.value; if(curD)renderFiles(curD); var pc=document.getElementById('d-p3chips'); if(pc&&curItem)pc.innerHTML=p3ChipsHTML(curItem); }
   // ===== 연간안전보건계획 (되고세이퍼式 매트릭스) =====
   const AP_MONTHS=['1','2','3','4','5','6','7','8','9','10','11','12'];
