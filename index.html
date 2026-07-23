@@ -151,6 +151,9 @@
   .frm .f-miss{border-color:#e5484d !important;background:#fff5f5}
   #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c2733;color:#fff;padding:11px 20px;border-radius:9px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100}
   #toast.show{opacity:1}
+  #pane-files thead th{position:relative}
+  .colgrip{position:absolute;right:-3px;top:0;height:100%;width:7px;cursor:col-resize;z-index:3}
+  .colgrip:hover{background:rgba(33,89,201,.3)}
   /* 법령 팝업 모달 */
   #lawmodal,#recmodal,#docmodal{position:fixed;inset:0;background:rgba(20,28,40,.45);display:none;align-items:center;justify-content:center;z-index:200}
   #lawmodal.show,#recmodal.show,#docmodal.show{display:flex}
@@ -899,6 +902,18 @@
         openCell = url ? `<button class="btn ghost sm" style="white-space:nowrap" onclick="window.open('${url.replace(/'/g,"%27")}','_blank')">열기 ↗</button>` : `<button class="btn ghost sm" disabled style="opacity:.5;cursor:default;white-space:nowrap">열기</button>`; }
       return `<tr><td>${badge}</td><td>${f[0]}</td><td class="tag" style="color:var(--muted)">${f[1]}</td><td>${memoIn}</td><td style="white-space:normal">${plantCell}</td><td style="text-align:right;white-space:nowrap">${openCell}</td></tr>`;}).join('')
       : `<tr><td colspan="6" style="color:var(--muted)">${all.length? '선택한 공장('+curPlant+')에 해당 항목이 없습니다': (d.folder? '개별 항목은 위 SharePoint 폴더에서 확인하세요.':'관련 폴더 연동 예정입니다.')}</td></tr>`;
+  }
+  function setupColResize(){
+    var table=document.querySelector('#pane-files table'); if(!table) return;
+    var ths=table.querySelectorAll('thead th');
+    var saved={}; try{saved=JSON.parse(localStorage.getItem('ehs_files_colw'))||{};}catch(e){}
+    ths.forEach(function(th,i){ if(saved[i])th.style.width=saved[i]+'px'; if(th.querySelector('.colgrip'))return; if(i===ths.length-1)return;
+      var grip=document.createElement('div'); grip.className='colgrip'; grip.title='드래그해 열 너비 조절'; th.appendChild(grip);
+      grip.addEventListener('mousedown',function(e){ e.preventDefault(); e.stopPropagation(); var sx=e.pageX, sw=th.offsetWidth;
+        function mv(ev){ th.style.width=Math.max(36,sw+(ev.pageX-sx))+'px'; }
+        function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); var o={}; try{o=JSON.parse(localStorage.getItem('ehs_files_colw'))||{};}catch(_){} o[i]=th.offsetWidth; try{localStorage.setItem('ehs_files_colw',JSON.stringify(o));}catch(_){} }
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up); });
+    });
   }
   function fmemoAll(){try{return JSON.parse(localStorage.getItem('ehs_file_memo'))||{};}catch(e){return{};}}
   function fmemoGet(url){return fmemoAll()[(curItem||'')+'|'+url]||'';}
@@ -1778,6 +1793,7 @@
     a.addEventListener('click',function(){ const on=box.classList.toggle('open'); a.classList.toggle('exp',on); });
   });
   renderDevStatus();
+  setupColResize();
   // ===== 법령 팝업 =====
   const LAW_INFO={
     '산업안전보건법':{name:'산업안전보건법',eff:'시행 2026.6.1. · 법률 제21374호(2026.2.19 공포)',
