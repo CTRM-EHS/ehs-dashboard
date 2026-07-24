@@ -214,7 +214,6 @@
       <a class="navtop" data-p="system" data-grp="system">◇ 경영시스템 <span class="caret">▾</span></a>
       <div class="subnav" id="sub-system">
         <a data-p="system" data-g="sysdoc">안전보건체계문서</a>
-        <a data-p="system" data-g="sysplan">연간안전보건계획</a>
       </div>
 
       <div class="grp grp-done">✅ 도메인 · 개발완료</div>
@@ -284,7 +283,6 @@
             <div class="fav-grid" id="favGrid"></div>
           </div>
         </div>
-        <span>이대선 (EHS팀)</span><div class="avatar">CTR</div>
       </div>
     </div>
     <div class="content">
@@ -376,9 +374,8 @@
 
       <!-- ============ 안전보건환경경영시스템 ============ -->
       <section class="page" id="system">
-        <div class="banner sys"><div class="ico">◇</div><div><div class="bt">안전보건환경경영시스템</div><div class="bd">ISO 14001(환경)·ISO 45001(안전보건) 통합 경영시스템 — 체계문서 및 연간계획</div></div></div>
-        <div class="group" data-grp="sysdoc"><div class="ghead"><span class="swatch" style="background:#3b78ef"></span> 안전보건체계문서 <span class="cnt">인증서·ISO 14001·ISO 45001 폴더 포함</span></div><div class="tiles" id="t-sysdoc"></div></div>
-        <div class="group" data-grp="sysplan"><div class="ghead"><span class="swatch" style="background:#3b78ef"></span> 연간안전보건계획 <span class="cnt">되고세이퍼 기반</span></div><div class="tiles" id="t-sysplan"></div></div>
+        <div class="banner sys"><div class="ico">◇</div><div><div class="bt">안전보건환경경영시스템</div><div class="bd">ISO 14001(환경)·ISO 45001(안전보건) 통합 경영시스템 — 매뉴얼·프로세스·지침서·인증서</div></div></div>
+        <div class="group" data-grp="sysdoc"><div class="ghead"><span class="swatch" style="background:#3b78ef"></span> 안전보건체계문서 <span class="cnt">매뉴얼·프로세스·지침서·인증서</span></div><div class="tiles" id="t-sysdoc"></div></div>
       </section>
 
       <!-- ============ 관련법령 조회 ============ -->
@@ -530,8 +527,7 @@
     hmgmt:['보건대행','작업환경측정','근골격계 유해요인조사','체감온도 관리','조도측정'],
     checkup:['정기건강검진','배치전검진','배치후검진','특수건강검진관리','뇌심혈관질환 관리','직무스트레스'],
     hprog:['청력보존 프로그램','밀폐공간 프로그램'],
-    sysdoc:['안전보건체계문서'],
-    sysplan:['연간안전보건계획']
+    sysdoc:['안전보건체계문서']
   };
   const CLS={plan:'plan',safe:'safe',fire:'fire',hazmat:'hazmat',gas:'gas',elev:'elev',rad:'rad',air:'air',chem:'chem',water:'water',waste:'waste',envacc:'envacc',envcert:'envcert',hmgmt:'hmgmt',checkup:'checkup',hprog:'hprog',sysdoc:'sys',sysplan:'sys'};
   const TID={plan:'t-plan',safe:'safeMain',fire:'fire',hazmat:'hazmat',gas:'gas',elev:'elev',rad:'rad',air:'air',chem:'chem',water:'water',waste:'waste',envacc:'envacc',envcert:'envcert',hmgmt:'hmgmt',checkup:'checkup',hprog:'hprog',sysdoc:'t-sysdoc',sysplan:'t-sysplan'};
@@ -1038,16 +1034,22 @@
       +'</div>';
   }
   function subFoldersHTML(){
-    const names=['인증서','ISO 14001','ISO 45001'];
-    return '<div class="card"><h3>안전보건체계문서 <span class="tag">하위 폴더 3개 · SharePoint 연동</span></h3>'
-      +names.map((nm,i)=>{const s=itemData[nm]||{};const files=s.files||[];
-        return '<details style="border:1px solid var(--line);border-radius:9px;margin-bottom:8px;padding:2px 12px"'+(i===0?' open':'')+'>'
-          +'<summary style="cursor:pointer;font-weight:700;padding:9px 0">📁 '+nm+' <span class="tag" style="font-weight:400">'+esc(s.desc||'')+'</span></summary>'
-          +(s.folder?'<div style="margin:4px 0 8px"><button class="btn ghost sm" onclick="window.open(\''+s.folder.replace(/'/g,"%27")+'\',\'_blank\')">SharePoint 폴더 열기 ↗</button></div>':'')
-          +'<table style="margin-bottom:8px"><thead><tr><th>파일명</th><th style="width:90px">구분</th><th style="width:70px">수정</th></tr></thead><tbody>'
-          +(files.length?files.map(f=>'<tr><td>'+esc(f[0])+'</td><td>'+esc(f[1])+'</td><td>'+esc(f[2])+'</td></tr>').join(''):'<tr><td colspan="3" style="color:var(--muted)">폴더에서 확인</td></tr>')
-          +'</tbody></table></details>';
-      }).join('')+'</div>';
+    var PROC='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/프로세스/■ P-EHS(EHS 프로세스)-Rev.3.xlsx';
+    var MAN='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/매뉴얼/CTR _EHS 매뉴얼_Rev.1_2023.04.25 (모빌리티).docx';
+    var DOCN={'I-EHS-01':'EHS 리스크 관리지침','I-EHS-02':'EHS 교육 운영 지침','I-EHS-03':'환경운영관리 지침','I-EHS-04':'안전보건 운영관리 지침','I-EHS-05':'EHS 비상사태 운영 지침','I-EHS-06':'EHS 준수평가 관리지침','I-EHS-07':'산업재해관리 지침','I-EHS-08':'내부심사 지침','I-EHS-09':'문서관리 지침','I-EHS-10':'시정 및 예방조치 지침','I-EHS-12':'경영검토 지침'};
+    function open2(url){ return "window.open('"+String(url).replace(/'/g,"%27")+"','_blank')"; }
+    function row(icon,label,sub,onclick){ return '<div onclick="'+onclick+'" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;cursor:pointer;background:#fff" onmouseover="this.style.background=\'#f5f8ff\'" onmouseout="this.style.background=\'#fff\'"><span style="font-size:15px">'+icon+'</span><div style="flex:1"><div style="font-weight:600;font-size:12.5px">'+esc(label)+'</div>'+(sub?'<div style="font-size:11px;color:var(--muted)">'+esc(sub)+'</div>':'')+'</div><span style="color:#2159c9;font-size:12px;white-space:nowrap">열기 ↗</span></div>'; }
+    function head(t){ return '<div style="font-weight:700;font-size:12.5px;margin:16px 0 8px;color:var(--navy)">'+t+'</div>'; }
+    var out='<div class="card"><h3>안전보건체계문서 <span class="tag">매뉴얼·프로세스·지침서·인증서 · 클릭 시 원본 바로 열림</span></h3>';
+    out+='<div style="margin-top:6px"></div>'+head('경영매뉴얼 · 프로세스').replace('margin:16px','margin:2px');
+    out+=row('📕','CTR EHS 경영매뉴얼 (Rev.1)','ISO 14001·45001 통합 경영매뉴얼', open2(MAN));
+    out+=row('🗺️','P-EHS EHS 프로세스 (Rev.3)','EHS 업무 프로세스 정의', open2(PROC));
+    out+=head('지침서 (I-EHS)');
+    Object.keys(DOCN).forEach(function(code){ out+=row('📄',code+'  '+DOCN[code],'', "openDoc('"+code+"')"); });
+    out+=head('인증서 · ISO 문서함');
+    ['인증서','ISO 14001','ISO 45001'].forEach(function(nm){ var s=itemData[nm]||{}; if(s.folder) out+=row('📁',nm,s.desc||'', open2(s.folder)); });
+    out+='</div>';
+    return out;
   }
   // ===== 안전점검순찰: 공장별 월별 종합 현황 (종합new 캡처 스냅샷) =====
   const PT_TYPES=['일반','위험성평가','테마별순회점검','정기순회점검'];
@@ -1947,7 +1949,7 @@
     ['안전','var(--s)',[['safe','안전'],['fire','소방'],['hazmat','위험물'],['gas','가스'],['elev','승강기'],['rad','방사선']]],
     ['환경','var(--e)',[['air','대기'],['chem','화학물질'],['water','수질'],['waste','폐기물'],['envacc','환경사고'],['envcert','환경필증·보험']]],
     ['보건','var(--h)',[['hmgmt','보건관리'],['checkup','건강검진'],['hprog','보건 프로그램']]],
-    ['경영시스템','#3b78ef',[['sysdoc','안전보건체계문서'],['sysplan','연간안전보건계획']]]
+    ['경영시스템','#3b78ef',[['sysdoc','안전보건체계문서']]]
   ];
   const STD_LAW={ safe:'산업안전보건법', fire:'소방시설 설치·관리법 / 화재예방법', hazmat:'위험물안전관리법',
     gas:'고압가스·도시가스·액화석유가스법', elev:'승강기안전관리법', rad:'원자력안전법',
