@@ -1553,9 +1553,9 @@
     out+='<div style="margin-bottom:10px"><b style="font-size:15px">중대재해처벌법 이행현황</b> <span style="font-size:12px;color:var(--muted)">· 법 제4조(중대산업재해) · 3개 공장 통합 · '+CJC_HALF_LABEL+'</span></div>';
     CJC.forEach(function(h,hi){
       out+='<div style="background:var(--navy);color:#fff;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:700;margin:14px 0 8px">'+h.ho+' · '+esc(CJC_LAW[h.ho].split('—')[1].trim())+'</div>';
-      out+='<table><tbody>';
+      out+='<table class="cjctbl" style="table-layout:fixed;width:100%"><colgroup><col class="cjc-c0" style="width:42%"><col></colgroup><tbody>';
       h.items.forEach(function(it,ii){
-        out+='<tr><td style="width:42%;font-size:12.5px;font-weight:600;vertical-align:top;padding:8px 6px">'+(ii+1)+'. '+esc(it.t)+(it.b?' <span style="display:inline-block;white-space:nowrap;background:#eef1f5;color:#5a6675;font-size:10px;padding:1px 7px;border-radius:9px">'+esc(it.b)+'</span>':'')+'</td>'
+        out+='<tr><td style="font-size:12.5px;font-weight:600;vertical-align:top;padding:8px 6px;position:relative;overflow:hidden">'+(ii+1)+'. '+esc(it.t)+(it.b?' <span style="display:inline-block;white-space:nowrap;background:#eef1f5;color:#5a6675;font-size:10px;padding:1px 7px;border-radius:9px">'+esc(it.b)+'</span>':'')+'</td>'
           +'<td style="vertical-align:top;padding:6px"><div style="margin-bottom:4px"><button class="btn ghost sm" onclick="cjcGuide('+hi+','+ii+')">가이드</button></div><div><span style="color:var(--muted);font-size:11px">근거자료</span>'+cjcEvHTML(hi,ii)+'</div></td></tr>';
       });
       out+='</tbody></table>';
@@ -1563,6 +1563,20 @@
     out+='<div style="font-size:11px;color:var(--muted);margin-top:12px">※ 법 제4조(중대산업재해) 15개 의무. 가이드=의무별 이행 확인사항, 근거자료=협업공간 ★개체 폴더(카테고리·공장별) 링크. 회색 번호=★개체 폴더번호. 시민재해 제외.</div>';
     out+='</div>';
     return out;
+  }
+  function cjcColResize(){
+    var host=document.getElementById('d-custom'); if(!host) return;
+    var tables=host.querySelectorAll('table.cjctbl'); if(!tables.length) return;
+    function apply(px){ tables.forEach(function(t){ var c=t.querySelector('col.cjc-c0'); if(c)c.style.width=px+'px'; }); }
+    var w=parseInt(localStorage.getItem('ehs_cjc_colw')||'',10); if(w) apply(w);
+    tables.forEach(function(t){
+      var td=t.querySelector('tbody tr td'); if(!td||td.querySelector('.colgrip')) return;
+      var grip=document.createElement('div'); grip.className='colgrip'; grip.title='드래그해 열 너비 조절'; td.appendChild(grip);
+      grip.addEventListener('mousedown',function(e){ e.preventDefault(); e.stopPropagation(); var sx=e.pageX, sw=td.offsetWidth;
+        function mv(ev){ apply(Math.max(90,sw+(ev.pageX-sx))); }
+        function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); var c=t.querySelector('col.cjc-c0'); var fw=c&&c.style.width?parseInt(c.style.width,10):td.offsetWidth; try{localStorage.setItem('ehs_cjc_colw',String(fw));}catch(_){} }
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up); });
+    });
   }
   function openItem(name){
     if(name==='교육'){ go('edu'); return; }
@@ -1628,7 +1642,7 @@
       document.getElementById('d-flow').innerHTML=d.flow.map((s,i)=>
         `<div class="fstep"><div class="sn">${_pdca[i]||('STEP '+s[0])}</div><div class="st">${s[1]}</div>${s[2]?`<div class="so">${s[2]}</div>`:''}</div>`+
         (i<d.flow.length-1?'<div class="farrow">▶</div>':'')).join('');
-      const c=document.getElementById('d-custom'); if(c){c.style.display=''; c.innerHTML=cjcHTML();}
+      const c=document.getElementById('d-custom'); if(c){c.style.display=''; c.innerHTML=cjcHTML(); cjcColResize();}
       document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('on'));
       document.getElementById('detail').classList.add('on');
       document.querySelector('.content').scrollTop=0;
