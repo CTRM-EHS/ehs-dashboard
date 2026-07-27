@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # jonghap_new.csv -> patrol_data.js
-# 기간: '연 누적' + 월별(당월) 1~12월(데이터 있는 달만). 열 위치 자동 탐지.
-import json, sys, glob, os, datetime, re
+# 기간: 연 누적 + [월 누적 드롭다운] + 월별(당월) 버튼. 열 위치 자동 탐지.
+import json, sys, glob, os, datetime
 def find_csv():
     if len(sys.argv) > 1 and os.path.exists(sys.argv[1]): return sys.argv[1]
     c = glob.glob('/sessions/*/mnt/**/jonghap_new.csv', recursive=True)
@@ -22,24 +22,27 @@ for i, r in enumerate(rows):
 if hr < 1: sys.exit('CSV 헤더(구분/점검구분)를 찾지 못했습니다')
 catcol = gc + 2
 per, sub = rows[hr-1], rows[hr]
-# 발굴 컬럼 순서대로 (열, 라벨)
 fugul = [(c, per[c].strip() if c < len(per) else '') for c in range(len(sub)) if sub[c].strip() == '발굴']
-pcol = {}; order = []
-# 1) 연 누적 (####년 누적)
-for c, lab in fugul:
-    if lab.endswith('년 누적'):
-        pcol[lab] = (c, c+1); order.append(lab); break
-# 2) 월별 당월 = 라벨이 1,2,3,...로 연속 증가하는 '첫' 블록(블록A)
-i = 0
+# 숫자 연속 런(1,2,3,...) 추출
+runs = []; i = 0
 while i < len(fugul):
     if fugul[i][1] == '1':
-        exp = 1; j = i
+        exp = 1; run = []; j = i
         while j < len(fugul) and fugul[j][1] == str(exp):
-            lbl = str(exp) + '월'
-            pcol[lbl] = (fugul[j][0], fugul[j][0]+1); order.append(lbl)
-            exp += 1; j += 1
-        break
-    i += 1
+            run.append(fugul[j]); exp += 1; j += 1
+        runs.append(run); i = j
+    else:
+        i += 1
+monthly_runs = [r for r in runs if len(r) >= 8]   # 12개월 런 (당월, 누적)
+pcol = {}; ann = None; month_labels = []; cum_labels = []
+for c, lab in fugul:
+    if lab.endswith('년 누적'): ann = lab; pcol[lab] = (c, c+1); break
+if len(monthly_runs) >= 1:  # 당월
+    for k, (c, lab) in enumerate(monthly_runs[0]):
+        L = str(k+1) + '월'; pcol[L] = (c, c+1); month_labels.append(L)
+if len(monthly_runs) >= 2:  # 누적
+    for k, (c, lab) in enumerate(monthly_runs[1]):
+        L = str(k+1) + '월 누적'; pcol[L] = (c, c+1); cum_labels.append(L)
 def catOf(s):
     s = s.strip()
     if s in ('총계','소계'): return '계'
@@ -70,14 +73,29 @@ for i in range(hr+1, len(rows)):
         if f is None and dn is None: continue
         d[cur].setdefault(p, {})
         d[cur][p][cat] = [f or 0, dn or 0]
-# 계=0 기간 제거
+# 당월 계=0 제거
 for fac in list(d.keys()):
-    for p in list(d[fac].keys()):
-        t = d[fac][p].get('계')
-        if not t or (t[0] == 0 and t[1] == 0): del d[fac][p]
-order = [p for p in order if any(p in d[f] for f in d)]
+    for L in month_labels:
+        t = d[fac].get(L, {}).get('계')
+        if not t or (t[0] == 0 and t[1] == 0): d[fac].pop(L, None)
+# 마지막 활동 월
+def midx(L): return int(L.replace('월 누적','').replace('월',''))
+active = [midx(L) for L in month_labels if any(L in d[f] for f in d)]
+lastM = max(active) if active else 0
+# 월 누적: 마지막 활동 월까지만 유지, 그 이후 제거
+keep_cum = []
+for L in cum_labels:
+    if midx(L) <= lastM: keep_cum.append(L)
+    else:
+        for fac in d: d[fac].pop(L, None)
+# 순서 정리
+months_order = [L for L in month_labels if any(L in d[f] for f in d)]
+periods = ([ann] if ann else []) + months_order      # 버튼(연 누적 + 당월)
+cumPeriods = keep_cum                                  # 드롭다운(월 누적)
 kst = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
-obj = {"stamp": kst.strftime('%Y-%m-%d') + ' 기준', "periods": order, "d": d}
+obj = {"stamp": kst.strftime('%Y-%m-%d') + ' 기준', "periods": periods, "cumPeriods": cumPeriods, "d": d}
 open(OUT, 'w', encoding='utf-8').write('window.PATROL_DATA = ' + json.dumps(obj, ensure_ascii=False, separators=(',',':')) + ';')
-print('OK periods=', order)
-print('CTR Mobility 계:', {p:d['CTR Mobility'][p]['계'] for p in order})
+print('버튼:', periods)
+print('드롭다운:', cumPeriods)
+print('CTR 당월 계:', {p:d['CTR Mobility'][p]['계'] for p in months_order})
+print('CTR 누적 계:', {p:d['CTR Mobility'][p]['계'] for p in cumPeriods})
