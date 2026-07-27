@@ -1055,7 +1055,7 @@
   const PT_TYPES=['일반','위험성평가','테마별순회점검','정기순회점검'];
   const PT_TLABEL={'일반':'01. 일반','위험성평가':'02. 위험성평가','테마별순회점검':'03. 테마별순회점검','정기순회점검':'04. 정기순회점검'};
   const PATROL={
-    periods:['2026년 누적','5월 누적','1분기','2분기','3분기','4분기'],
+    periods:['2026년 누적','7월 누적'],
     fac:[{n:'CTR Mobility',s:'총계',c:'#1b2a4a'},{n:'10-울산',s:'소계',c:'#2159c9'},{n:'30-서산',s:'소계',c:'#0f8a45'},{n:'40-대구',s:'소계',c:'#c1461b'}],
     d:{
       'CTR Mobility':{'2026년 누적':{계:[392,294],일반:[45,29],위험성평가:[186,119],테마별순회점검:[94,86],정기순회점검:[67,60]},'5월 누적':{계:[377,285],일반:[44,28],위험성평가:[186,119],테마별순회점검:[86,81],정기순회점검:[61,57]},'1분기':{계:[289,213],일반:[19,15],위험성평가:[185,118],테마별순회점검:[54,50],정기순회점검:[31,30]},'2분기':{계:[103,81],일반:[26,14],위험성평가:[1,1],테마별순회점검:[40,36],정기순회점검:[36,30]}},
@@ -1078,7 +1078,7 @@
   var PATROL_LIVE = (typeof window!=='undefined' && window.PATROL_DATA) ? window.PATROL_DATA : PATROL_EMBED;
   var ptStamp=null, ptLiveLoaded=false, ptTimer=null;
   function ptBadge(){ return ptLiveLoaded ? '<span class="pill g" style="font-size:10.5px">● CSV 반영'+(ptStamp?' · '+esc(ptStamp):'')+'</span>' : '<span class="pill" style="font-size:10.5px;background:#eef1f5;color:#788699">캡처 스냅샷</span>'; }
-  function ptApplyLive(j){ if(j&&j.d){ PATROL.d=j.d; ptStamp=j.stamp||j.updated||''; ptLiveLoaded=true; return true; } return false; }
+  function ptApplyLive(j){ if(j&&j.d){ PATROL.d=j.d; if(j.periods&&j.periods.length)PATROL.periods=j.periods; ptStamp=j.stamp||j.updated||''; ptLiveLoaded=true; return true; } return false; }
   // 종합new CSV 파서 — 공장별 월별 종합 현황(발굴/완료)만 추출
   function ptParseCSV(text){
     var lines=text.split(/\r?\n/).map(function(l){return l.split(',');});
