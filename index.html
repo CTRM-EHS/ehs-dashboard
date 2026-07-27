@@ -533,7 +533,18 @@
   const TID={plan:'t-plan',safe:'safeMain',fire:'fire',hazmat:'hazmat',gas:'gas',elev:'elev',rad:'rad',air:'air',chem:'chem',water:'water',waste:'waste',envacc:'envacc',envcert:'envcert',hmgmt:'hmgmt',checkup:'checkup',hprog:'hprog',sysdoc:'t-sysdoc',sysplan:'t-sysplan'};
   function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function tile(cls,name){return `<div class="tile ${cls}" onclick="openItem('${esc(name)}')"><div class="nm">${name}</div><span class="tarrow">›</span></div>`;}
-  Object.keys(D).forEach(k=>{document.getElementById(TID[k]).innerHTML=D[k].map(n=>tile(CLS[k],n)).join('');});
+  function renderTiles(){
+    var m=itemDoneMap();
+    Object.keys(D).forEach(function(k){
+      var host=document.getElementById(TID[k]); if(!host) return;
+      var items=D[k].filter(function(nm){return !m[nm];});
+      host.innerHTML=items.map(function(n){return tile(CLS[k],n);}).join('');
+      if(k==='sysdoc'||k==='sysplan') return;
+      var cnt=document.querySelector('.group[data-grp="'+k+'"] .ghead .cnt');
+      if(cnt) cnt.textContent=items.length+'개 항목';
+    });
+  }
+  renderTiles();
   // 도메인 navtop 총계 + 그룹 카운트 — 개발완료 항목은 제외하고 표시
   const DOM_GROUPS={plan:['plan'],safety:['safe','fire','hazmat','gas','elev','rad'],env:['air','chem','water','waste','envacc','envcert'],health:['hmgmt','checkup','hprog']};
   function updateNavCounts(){
@@ -570,6 +581,7 @@
   function renderDevStatus(){
     var m=itemDoneMap();
     updateNavCounts();
+    if(typeof renderTiles==='function') renderTiles();
     document.querySelectorAll('.subsub a[data-item]').forEach(function(el){ el.classList.toggle('done', !!m[el.dataset.item]); });
     var host=document.getElementById('dom-done'); if(!host) return;
     var out='', any=false;
