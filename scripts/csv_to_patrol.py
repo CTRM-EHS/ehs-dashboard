@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# jonghap_new.csv -> patrol_data.js 변환 (정기 자동반영용)
-# 사용: python3 csv_to_patrol.py [CSV경로] [출력경로]
+# jonghap_new.csv -> patrol_data.js (열 위치/기간 라벨에 강건)
 import json, sys, glob, os, datetime
 def find_csv():
     if len(sys.argv) > 1 and os.path.exists(sys.argv[1]): return sys.argv[1]
@@ -13,12 +12,18 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else 'patrol_data.js'
 rows = []
 with open(CSV, encoding='utf-8-sig') as f:
     for line in f: rows.append(line.rstrip('\r\n').split(','))
-hr = -1
+# 헤더행과 '구분' 열 위치(gc) 자동 탐지
+hr = -1; gc = 0
 for i, r in enumerate(rows):
-    if len(r) > 2 and r[0].strip() == '구분' and r[2].strip() == '점검구분': hr = i; break
+    for c in range(len(r)-2):
+        if r[c].strip() == '구분' and r[c+2].strip() == '점검구분':
+            hr = i; gc = c; break
+    if hr >= 0: break
 if hr < 1: sys.exit('CSV 헤더(구분/점검구분)를 찾지 못했습니다')
+catcol = gc + 2
 per, sub = rows[hr-1], rows[hr]
-want = ['2026년 누적','5월 누적','1분기','2분기','3분기','4분기']
+# 표시할 기간(있는 것만 채택) — 신/구 라벨 모두 허용
+want = ['2026년 누적','7월 누적','6월 누적','5월 누적','1분기','2분기','3분기','4분기']
 pcol = {}
 for c in range(len(sub)):
     if sub[c].strip() == '발굴':
@@ -39,13 +44,13 @@ facs = ['CTR Mobility','10-울산','30-서산','40-대구']
 d = {}; cur = None
 for i in range(hr+1, len(rows)):
     r = rows[i]
-    if len(r) > 0 and r[0].strip() == 'END': break
-    f0 = r[0].strip() if len(r) > 0 else ''
-    f1 = r[1].strip() if len(r) > 1 else ''
-    if f0 in facs: cur = f0
-    elif f1 in facs: cur = f1
+    if len(r) > gc and r[gc].strip() == 'END': break
+    fa = r[gc].strip() if len(r) > gc else ''
+    fb = r[gc+1].strip() if len(r) > gc+1 else ''
+    if fa in facs: cur = fa
+    elif fb in facs: cur = fb
     if not cur: continue
-    cat = catOf(r[2]) if len(r) > 2 else None
+    cat = catOf(r[catcol]) if len(r) > catcol else None
     if not cat: continue
     d.setdefault(cur, {})
     for p,(fc,dc) in pcol.items():
@@ -58,8 +63,10 @@ for fac in list(d.keys()):
     for p in list(d[fac].keys()):
         t = d[fac][p].get('계')
         if not t or (t[0] == 0 and t[1] == 0): del d[fac][p]
+# 채택된 기간 순서(want 순서 유지, 실제 데이터 있는 것만)
+order = [p for p in want if any(p in d[f] for f in d)]
 kst = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
-obj = {"stamp": kst.strftime('%Y-%m-%d') + ' 기준', "d": d}
+obj = {"stamp": kst.strftime('%Y-%m-%d') + ' 기준', "periods": order, "d": d}
 open(OUT, 'w', encoding='utf-8').write('window.PATROL_DATA = ' + json.dumps(obj, ensure_ascii=False, separators=(',',':')) + ';')
-print('OK: ' + CSV + ' -> ' + OUT)
-print('CTR Mobility 2026년 누적:', d.get('CTR Mobility',{}).get('2026년 누적'))
+print('OK gc=%d catcol=%d periods=%s' % (gc, catcol, order))
+print('CTR Mobility:', d.get('CTR Mobility'))
