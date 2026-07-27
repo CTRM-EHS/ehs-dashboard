@@ -607,30 +607,35 @@
   function toggleDoneNode(h){ h.classList.toggle('open'); }
 
   // ===== 관련법령 조회 =====
+  // r[4]: 하위법령 — 'LR'=시행령+시행규칙, 'L'=시행령만, ''=없음(자체규칙·ISO 등)
   const LAWDATA=[
-    ['S','산업안전보건법','산안위·위험성평가·교육·건강진단·작업환경측정·안전작업허가','I-EHS-01·02·04·07'],
-    ['S','중대재해처벌법','안전보건관리체계 9대 의무','전 지침서'],
-    ['S','산업안전보건기준규칙','밀폐공간·조도 등','I-EHS-04'],
-    ['S','소방시설 설치·관리법 / 화재예방법','소방계획서·작동기능점검·훈련','I-EHS-04 Ⅸ'],
-    ['S','위험물안전관리법','위험물안전관리자·저장소','I-EHS-04'],
-    ['S','고압가스·도시가스·액화석유가스법','가스 선임·정기검사','—(법령)'],
-    ['S','승강기안전관리법','승강기 안전검사·보험','—(법령)'],
-    ['S','원자력안전법','방사선 사용신고·안전관리자','—(법령)'],
-    ['E','대기환경보전법','대기 배출·방지시설·자가측정','I-EHS-03'],
-    ['E','물환경보전법','폐수 배출·위탁·수질','I-EHS-03'],
-    ['E','폐기물관리법','폐기물 위탁·올바로','I-EHS-03'],
-    ['E','자원순환기본법','폐기물처분부담금','—(법령)'],
-    ['E','환경오염피해구제법','환경책임보험 가입·갱신','—(법령)'],
-    ['E','화학물질관리법(화관법)','MSDS·통계조사·배출량·정기검사','I-EHS-03'],
-    ['E','토양환경보전법 / 소음·진동관리법','토양·소음진동 관리','I-EHS-03'],
-    ['H','산업안전보건법(보건)','건강진단·작업환경측정·근골격계','I-EHS-04'],
-    ['공통','ISO 14001 / ISO 45001','환경·안전보건 경영시스템 인증','전 지침서']
+    ['S','산업안전보건법','산안위·위험성평가·교육·건강진단·작업환경측정·안전작업허가','I-EHS-01·02·04·07','LR'],
+    ['S','중대재해처벌법','안전보건관리체계 9대 의무','전 지침서','L'],
+    ['S','산업안전보건기준규칙','밀폐공간·조도 등','I-EHS-04',''],
+    ['S','소방시설 설치·관리법','소방계획서·작동기능점검·소방시설','I-EHS-04 Ⅸ','LR'],
+    ['S','화재의 예방 및 안전관리에 관한 법률','소방훈련·교육·화재예방','I-EHS-04 Ⅸ','LR'],
+    ['S','위험물안전관리법','위험물안전관리자·저장소','I-EHS-04','LR'],
+    ['S','고압가스 안전관리법','고압가스 선임·정기검사','—(법령)','LR'],
+    ['S','도시가스사업법','도시가스 안전관리·검사','—(법령)','LR'],
+    ['S','액화석유가스의 안전관리 및 사업법','LPG 안전관리·검사','—(법령)','LR'],
+    ['S','승강기안전관리법','승강기 안전검사·보험','—(법령)','LR'],
+    ['S','원자력안전법','방사선 사용신고·안전관리자','—(법령)','LR'],
+    ['E','대기환경보전법','대기 배출·방지시설·자가측정','I-EHS-03','LR'],
+    ['E','물환경보전법','폐수 배출·위탁·수질','I-EHS-03','LR'],
+    ['E','폐기물관리법','폐기물 위탁·올바로','I-EHS-03','LR'],
+    ['E','자원순환기본법','폐기물처분부담금','—(법령)','LR'],
+    ['E','환경오염피해구제법','환경책임보험 가입·갱신','—(법령)','LR'],
+    ['E','화학물질관리법(화관법)','MSDS·통계조사·배출량·정기검사','I-EHS-03','LR'],
+    ['E','토양환경보전법','특정토양오염관리대상시설 검사','I-EHS-03','LR'],
+    ['E','소음·진동관리법','배출시설 규제기준·측정','I-EHS-03','LR'],
+    ['H','산업안전보건법(보건)','건강진단·작업환경측정·근골격계','I-EHS-04','LR'],
+    ['공통','ISO 14001 / ISO 45001','환경·안전보건 경영시스템 인증','전 지침서','']
   ];
   function renderLaw(){
     const q=(document.getElementById('lawq').value||'').toLowerCase();
     const clr={S:'var(--s)',E:'var(--e)',H:'var(--h)','공통':'#3b78ef'};
     document.getElementById('lawbody').innerHTML=LAWDATA.filter(r=>(r[1]+r[2]).toLowerCase().includes(q)).map(r=>
-      `<tr><td><span class="pill" style="background:${clr[r[0]]||'#888'};color:#fff">${r[0]}</span></td><td><b style="cursor:pointer;color:#2159c9" onclick="showLawModal('${r[1]}','${r[1]}')" title="요약 조문 보기">${r[1]}</b> <span style="cursor:pointer;color:#2159c9;font-size:11px" onclick="openLawSource('${r[1]}')" title="국가법령정보센터 최신 원문(새창)">원문↗</span></td><td>${r[2]}</td><td class="tag">${r[3]}</td></tr>`).join('')
+      `<tr><td><span class="pill" style="background:${clr[r[0]]||'#888'};color:#fff">${r[0]}</span></td><td><b style="cursor:pointer;color:#2159c9" onclick="showLawModal('${r[1]}','${r[1]}')" title="요약 조문 보기">${r[1]}</b> <span style="cursor:pointer;color:#2159c9;font-size:11px" onclick="openLawSource('${r[1]}')" title="법 원문(새창)">법↗</span>${(r[4]||'').includes('L')?` <span style="cursor:pointer;color:#2159c9;font-size:11px" onclick="openLawSub('${r[1]}','시행령')" title="시행령 원문(새창)">시행령↗</span>`:''}${(r[4]||'').includes('R')?` <span style="cursor:pointer;color:#2159c9;font-size:11px" onclick="openLawSub('${r[1]}','시행규칙')" title="시행규칙 원문(새창)">시행규칙↗</span>`:''}</td><td>${r[2]}</td><td class="tag">${r[3]}</td></tr>`).join('')
       || '<tr><td colspan="4" style="color:var(--muted)">검색 결과 없음</td></tr>';
   }
   function filterLaw(){renderLaw();}
@@ -1932,6 +1937,7 @@
   // 국가법령정보센터 공개 링크(항상 최신 시행 법령) — 새창으로 원문
   function lawViewUrl(raw){ return 'https://www.law.go.kr/법령/'+encodeURIComponent(officialLawName(raw)); }
   function openLawSource(raw){ if(!raw){return;} window.open(lawViewUrl(raw),'_blank','noopener'); }
+  function openLawSub(raw,kind){ if(!raw){return;} window.open('https://www.law.go.kr/법령/'+encodeURIComponent(officialLawName(raw)+' '+kind),'_blank','noopener'); }
 
   // 국가법령정보센터 Open API 설정 — open.law.go.kr에서 OC(이메일 ID) 발급 후 입력.
   //  · oc 미설정 시: 요약 조문 + '원문 새창'으로 자동 폴백(별도 설정 없이 바로 동작).
