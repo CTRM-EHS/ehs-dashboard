@@ -1067,7 +1067,7 @@
   function subFoldersHTML(){
     var PROC='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/프로세스/■ P-EHS(EHS 프로세스)-Rev.3.xlsx';
     var MAN='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/매뉴얼/CTR _EHS 매뉴얼_Rev.1_2023.04.25 (모빌리티).docx';
-    var DOCN={'I-EHS-01':'EHS 리스크 관리지침','I-EHS-02':'EHS 교육 운영 지침','I-EHS-03':'환경운영관리 지침','I-EHS-04':'안전보건 운영관리 지침','I-EHS-05':'EHS 비상사태 운영 지침','I-EHS-06':'EHS 준수평가 관리지침','I-EHS-07':'산업재해관리 지침','I-EHS-08':'내부심사 지침','I-EHS-09':'문서관리 지침','I-EHS-10':'시정 및 예방조치 지침','I-EHS-12':'경영검토 지침'};
+    var DOCN={'I-EHS-01':'EHS 리스크 관리지침','I-EHS-02':'EHS 교육 운영 지침','I-EHS-03':'환경운영관리 지침','I-EHS-04':'안전보건 운영관리 지침','I-EHS-05':'EHS 비상사태 운영 지침','I-EHS-06':'EHS 준수평가 관리지침','I-EHS-07':'산업재해관리 지침','I-EHS-08':'내부심사 지침','I-EHS-09':'문서관리 지침','I-EHS-10':'시정 및 예방조치 지침','I-EHS-11':'기록분류 및 파일링 지침','I-EHS-12':'경영검토 지침'};
     function open2(url){ return "window.open('"+String(url).replace(/'/g,"%27")+"','_blank')"; }
     function row(icon,label,sub,onclick){ return '<div onclick="'+onclick+'" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;cursor:pointer;background:#fff" onmouseover="this.style.background=\'#f5f8ff\'" onmouseout="this.style.background=\'#fff\'"><span style="font-size:15px">'+icon+'</span><div style="flex:1"><div style="font-weight:600;font-size:12.5px">'+esc(label)+'</div>'+(sub?'<div style="font-size:11px;color:var(--muted)">'+esc(sub)+'</div>':'')+'</div><span style="color:#2159c9;font-size:12px;white-space:nowrap">열기 ↗</span></div>'; }
     function head(t){ return '<div style="font-weight:700;font-size:12.5px;margin:16px 0 8px;color:var(--navy)">'+t+'</div>'; }
@@ -1914,7 +1914,7 @@
     [['순회','점검순찰','순회점검','점검개선'],['산업안전보건법']],
     [['보호구','안전보호구','개인보호구'],['산업안전보건법','산업안전보건기준규칙']]
   ];
-  const DOC_LINKS={"I-EHS-01": "https://ctrcentral-my.sharepoint.com/personal/ctrfs05_ctr_co_kr/Documents/EHS팀/EHS(공통)/00. 기획(공통)/03. ISO/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-01(EHS 리스크 관리지침)-Rev.3.xlsx", "I-EHS-02": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-02(EHS 교육 운영 지침)-Rev.1.xlsx", "I-EHS-03": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-03(환경운영관리 지침)--Rev.6.xlsx", "I-EHS-04": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-04(안전보건 운영관리 지침)-Rev.2 - (모빌리티).xlsx", "I-EHS-05": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-05(EHS 비상사태 운영 지침)-Rev.3(모빌리티).xlsx", "I-EHS-06": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-06(EHS 준수평가 관리지침)-Rev.2(모빌리티).xlsx", "I-EHS-07": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-07(산업재해관리 지침)-Rev2(모빌리티).xlsx", "I-EHS-08": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-08(내부심사 지침)-Rev.4(모빌리티).xlsx", "I-EHS-09": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-09(문서관리 지침)-Rev.4(모빌리티).xlsx", "I-EHS-10": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-10(시정 및 예방조치 지침)-Rev.3(모빌리티).xlsx", "I-EHS-12": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-12(경영검토 지침)-Rev.3.xlsx"};
+  const DOC_LINKS={"I-EHS-01": "https://ctrcentral-my.sharepoint.com/personal/ctrfs05_ctr_co_kr/Documents/EHS팀/EHS(공통)/00. 기획(공통)/03. ISO/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-01(EHS 리스크 관리지침)-Rev.3.xlsx", "I-EHS-02": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-02(EHS 교육 운영 지침)-Rev.1.xlsx", "I-EHS-03": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-03(환경운영관리 지침)--Rev.6.xlsx", "I-EHS-04": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-04(안전보건 운영관리 지침)-Rev.2 - (모빌리티).xlsx", "I-EHS-05": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-05(EHS 비상사태 운영 지침)-Rev.3(모빌리티).xlsx", "I-EHS-06": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-06(EHS 준수평가 관리지침)-Rev.2(모빌리티).xlsx", "I-EHS-07": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-07(산업재해관리 지침)-Rev2(모빌리티).xlsx", "I-EHS-08": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-08(내부심사 지침)-Rev.4(모빌리티).xlsx", "I-EHS-09": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-09(문서관리 지침)-Rev.4(모빌리티).xlsx", "I-EHS-10": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-10(시정 및 예방조치 지침)-Rev.3(모빌리티).xlsx", "I-EHS-11": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-11(기록분류 및 파일링 지침)-Rev.2(모빌리티).xlsx", "I-EHS-12": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-12(경영검토 지침)-Rev.3.xlsx"};
   function openDoc(code){ if(DOC_LINKS[code]){window.open(DOC_LINKS[code],'_blank');} else {toast(code+' 지침서 링크는 SharePoint 문서함 연동 시 활성화됩니다');} }
 
   // ===== 국가법령정보센터 최신 원문 연동 =====
@@ -1980,10 +1980,29 @@
   // ===== 기준 정보 (항목별 관련 법령 · 근거 절차서) =====
   // 초안 기준값 — 확정 고정값 제공 시 아래 맵을 교체하면 됨.
   const STD_ORDER=[
+    ['경영시스템','#3b78ef',[['sysdoc','안전보건체계문서']]],
     ['안전','var(--s)',[['safe','안전'],['fire','소방'],['hazmat','위험물'],['gas','가스'],['elev','승강기'],['rad','방사선']]],
     ['환경','var(--e)',[['air','대기'],['chem','화학물질'],['water','수질'],['waste','폐기물'],['envacc','환경사고'],['envcert','환경필증·보험']]],
-    ['보건','var(--h)',[['hmgmt','보건관리'],['checkup','건강검진'],['hprog','보건 프로그램']]],
-    ['경영시스템','#3b78ef',[['sysdoc','안전보건체계문서']]]
+    ['보건','var(--h)',[['hmgmt','보건관리'],['checkup','건강검진'],['hprog','보건 프로그램']]]
+  ];
+  // 경영시스템 문서 레지스트리(기준정보 탭 전용) — 매뉴얼·프로세스 + 지침서 12개
+  var SYS_MAN='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/매뉴얼/CTR _EHS 매뉴얼_Rev.1_2023.04.25 (모빌리티).docx';
+  var SYS_PROC='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/프로세스/■ P-EHS(EHS 프로세스)-Rev.3.xlsx';
+  var SYSDOCS=[
+    {grp:'매뉴얼', name:'CTR EHS 경영매뉴얼 (Rev.1)', url:SYS_MAN, law:'ISO 14001 / ISO 45001', memo:'ISO 14001·45001 통합 경영매뉴얼'},
+    {grp:'프로세스', name:'P-EHS EHS 프로세스 (Rev.3)', url:SYS_PROC, law:'ISO 14001 / ISO 45001', memo:'EHS 업무 프로세스 정의'},
+    {grp:'지침서', code:'I-EHS-01', name:'EHS 리스크 관리지침', law:'ISO 14001 / ISO 45001', memo:'Rev.3'},
+    {grp:'지침서', code:'I-EHS-02', name:'EHS 교육 운영 지침', law:'ISO 45001', memo:'Rev.1'},
+    {grp:'지침서', code:'I-EHS-03', name:'환경운영관리 지침', law:'ISO 14001', memo:'Rev.6'},
+    {grp:'지침서', code:'I-EHS-04', name:'안전보건 운영관리 지침', law:'ISO 45001', memo:'Rev.2 (Rev.3 수정안 진행)'},
+    {grp:'지침서', code:'I-EHS-05', name:'EHS 비상사태 운영 지침', law:'ISO 14001 / ISO 45001', memo:'Rev.3'},
+    {grp:'지침서', code:'I-EHS-06', name:'EHS 준수평가 관리지침', law:'ISO 14001 / ISO 45001', memo:'Rev.2'},
+    {grp:'지침서', code:'I-EHS-07', name:'산업재해관리 지침', law:'ISO 45001', memo:'Rev.2'},
+    {grp:'지침서', code:'I-EHS-08', name:'내부심사 지침', law:'ISO 14001 / ISO 45001', memo:'Rev.4'},
+    {grp:'지침서', code:'I-EHS-09', name:'문서관리 지침', law:'ISO 14001 / ISO 45001', memo:'Rev.4'},
+    {grp:'지침서', code:'I-EHS-10', name:'시정 및 예방조치 지침', law:'ISO 14001 / ISO 45001', memo:'Rev.3'},
+    {grp:'지침서', code:'I-EHS-11', name:'기록분류 및 파일링 지침', law:'ISO 14001 / ISO 45001', memo:'Rev.2'},
+    {grp:'지침서', code:'I-EHS-12', name:'경영검토 지침', law:'ISO 14001 / ISO 45001', memo:'Rev.3'}
   ];
   const STD_LAW={ safe:'산업안전보건법', fire:'소방시설 설치·관리법 / 화재예방법', hazmat:'위험물안전관리법',
     gas:'고압가스·도시가스·액화석유가스법', elev:'승강기안전관리법', rad:'원자력안전법',
@@ -2129,7 +2148,21 @@
     STD_ORDER.forEach(function(dom){
       var domName=dom[0], domClr=dom[1], groups=dom[2];
       var rows='', domCount=0, domEditing=false;
-      groups.forEach(function(gp){
+      var _isSys=(groups.length===1 && groups[0][0]==='sysdoc');
+      if(_isSys && STD_TAB!=='flow'){
+        SYSDOCS.forEach(function(dc){
+          var hay=((dc.grp||'')+' '+dc.name+' '+(dc.code||'')+' '+(dc.law||'')).toLowerCase();
+          if(q && hay.indexOf(q)<0) return;
+          domCount++;
+          var openJs = dc.code ? ("openDoc('"+dc.code+"')") : ("window.open('"+String(dc.url).replace(/'/g,"%27")+"','_blank')");
+          var codeCell = dc.code ? '<span class="pill" style="cursor:pointer;background:#e6effd;color:#2159c9;margin:1px 2px" onclick="'+openJs+'">'+esc(dc.code)+'</span>' : '<span class="tag" style="font-size:10px">'+esc(dc.grp)+'</span>';
+          rows+='<tr><td class="tag">'+esc(dc.grp)+'</td><td><b>'+esc(dc.name)+'</b></td><td>'+esc(dc.law||'—')+'</td><td>'+codeCell+'</td>'
+            +'<td class="tag" style="font-size:11px;color:var(--muted)">'+esc(dc.memo||'—')+'</td>'
+            +'<td style="text-align:center"><span class="pill" style="background:#eef0f4;color:#555;font-size:10px">문서</span></td>'
+            +'<td style="white-space:nowrap"><button class="btn sm" onclick="'+openJs+'">열기 ↗</button></td></tr>';
+        });
+      }
+      if(!_isSys) groups.forEach(function(gp){
         var g=gp[0], glabel=gp[1], items=D[g]||[];
         var itemRows='';
         items.forEach(function(name){
