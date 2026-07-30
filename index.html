@@ -21,7 +21,8 @@
   .brand .logo{display:flex;flex-direction:row;align-items:center;gap:9px;white-space:nowrap}
   .logoimg{height:18px;width:auto;flex-shrink:0}
   .logotxt{font-size:14px;font-weight:800;line-height:1.05}
-  .cnt-nav{font-size:11px;color:#8fa6c4;font-weight:600;margin-left:6px}
+  .cnt-nav{font-size:11px;color:#8fa6c4;font-weight:600;margin-left:auto}
+  .nav-ico{flex:0 0 1.55em;text-align:center;display:inline-block;line-height:1}
   .dom-empty{padding:7px 22px;color:#7f97ba;font-size:11px}
   .nav .grp.grp-done{color:#5fe0a6;background:rgba(55,201,138,.13);border-left:3px solid #37c98a;font-weight:800;font-size:11px}
   .nav .grp.grp-todo{color:#f0c86a;background:rgba(224,165,46,.12);border-left:3px solid #e0a52e;font-weight:800;font-size:11px}
@@ -55,6 +56,7 @@
   .nav .grp{padding:12px 20px 5px;font-size:10.5px;color:#7f97ba;letter-spacing:.5px}
   .nav .caret{margin-left:auto;font-size:9px;opacity:.7;transition:transform .15s}
   .nav a.navtop.exp .caret{transform:rotate(180deg)}
+  .cnt-nav + .caret,.cnt-nav + .mcaret{margin-left:0}
   .subnav{display:none}.subnav.open{display:block}
   .subnav a{padding:7px 20px 7px 42px;font-size:12px;color:#aebfd6;border-left:3px solid transparent}
   .subnav a:hover{background:rgba(255,255,255,.06);color:#fff}
@@ -213,25 +215,25 @@
   <aside class="side">
     <div class="brand"><div class="logo"><img src="ctr_logo.png" class="logoimg" alt="CTR"><span class="logotxt">EHS 업무포탈</span></div></div>
     <nav class="nav">
-      <a data-p="home" class="on">◧ 홈 (통합)</a>
-      <a href="https://ctrcentral.sharepoint.com/sites/93/SitePages/CollabHome.aspx" target="_blank" rel="noopener">◧ 홈 (쉐어포인트)</a>
+      <a data-p="home" class="on"><span class="nav-ico">◧</span>홈 (통합)</a>
+      <a href="https://ctrcentral.sharepoint.com/sites/93/SitePages/CollabHome.aspx" target="_blank" rel="noopener"><span class="nav-ico">◧</span>홈 (쉐어포인트)</a>
 
       <div class="grp">경영시스템</div>
-      <a class="navtop" data-p="system" data-grp="system">◇ 경영시스템 <span class="caret">▾</span></a>
+      <a class="navtop" data-p="system" data-grp="system"><span class="nav-ico">◇</span>경영시스템<span class="caret">▾</span></a>
       <div class="subnav" id="sub-system">
         <a data-p="system" data-g="sysdoc">안전보건체계문서</a>
       </div>
 
       <div id="dom-todo">
         <div class="dom-block" data-dom="plan">
-          <a class="navtop" data-p="plan" data-grp="plan">📋 기획<span class="caret">▾</span></a>
+          <a class="navtop" data-p="plan" data-grp="plan"><span class="nav-ico">📋</span>기획<span class="caret">▾</span></a>
           <div class="subnav" id="sub-plan">
             <a data-p="plan" data-g="plan">기획 (13)</a>
           </div>
         </div>
 
         <div class="dom-block" data-dom="safety">
-          <a class="navtop" data-p="safety" data-grp="safety">🛡 안전<span class="caret">▾</span></a>
+          <a class="navtop" data-p="safety" data-grp="safety"><span class="nav-ico">🛡</span>안전<span class="caret">▾</span></a>
           <div class="subnav" id="sub-safety">
             <a data-p="safety" data-g="safe">안전 (12)</a>
             <a data-p="safety" data-g="fire">소방 (8)</a>
@@ -243,7 +245,7 @@
         </div>
 
         <div class="dom-block" data-dom="env">
-          <a class="navtop" data-p="env" data-grp="env">♺ 환경<span class="caret">▾</span></a>
+          <a class="navtop" data-p="env" data-grp="env"><span class="nav-ico">♺</span>환경<span class="caret">▾</span></a>
           <div class="subnav" id="sub-env">
             <a data-p="env" data-g="air">대기 (6)</a>
             <a data-p="env" data-g="chem">화학물질 (5)</a>
@@ -255,7 +257,7 @@
         </div>
 
         <div class="dom-block" data-dom="health">
-          <a class="navtop" data-p="health" data-grp="health"><span style="color:#37c98a;font-weight:900">✚</span> 보건 <span class="caret">▾</span></a>
+          <a class="navtop" data-p="health" data-grp="health"><span class="nav-ico" style="color:#37c98a;font-weight:900">✚</span>보건<span class="caret">▾</span></a>
           <div class="subnav" id="sub-health">
             <a data-p="health" data-g="hmgmt">보건관리 (5)</a>
             <a data-p="health" data-g="checkup">건강검진 (6)</a>
@@ -265,9 +267,9 @@
       </div>
 
       <div class="grp">도구</div>
-      <a data-p="law">§ 관련법령 조회</a>
-      <a href="https://ctr-m.github.io/FLEXIBLE-BUDGET/vb2026.html" target="_blank" rel="noopener">▤ 예산실적분석보고서</a>
-      <a data-p="std">🗂 기준 정보</a>
+      <a data-p="law"><span class="nav-ico">§</span>관련법령 조회</a>
+      <a href="https://ctr-m.github.io/FLEXIBLE-BUDGET/vb2026.html" target="_blank" rel="noopener"><span class="nav-ico">▤</span>예산실적분석보고서</a>
+      <a data-p="std"><span class="nav-ico">🗂</span>기준 정보</a>
     </nav>
   </aside>
 
@@ -556,7 +558,7 @@
       var g=a.dataset.g; if(!g||!D[g]||!GRP_LABEL[g]) return;
       var nd=D[g].filter(function(nm){return m[nm];}).length;
       var mc=a.querySelector('.mcaret');
-      a.textContent=GRP_LABEL[g]+' ('+nd+')';
+      a.innerHTML=GRP_LABEL[g]+'<span class="cnt-nav">('+nd+')</span>';
       if(mc) a.appendChild(mc);
     });
     Object.keys(DOM_GROUPS).forEach(function(p){
