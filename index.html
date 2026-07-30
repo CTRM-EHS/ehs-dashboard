@@ -110,6 +110,12 @@
   .ghead{display:flex;align-items:center;gap:8px;margin:4px 0 9px;font-weight:800;font-size:14px}
   .ghead .cnt{font-size:11px;color:var(--muted);font-weight:400}.ghead .swatch{width:12px;height:12px;border-radius:3px}
   .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  /* 기준정보 화면 — 도메인 접기/펼치기(드롭다운) */
+  .std-domhead{cursor:pointer;user-select:none}
+  .std-domcnt{font-size:12px;color:var(--muted);font-weight:400;margin-left:2px}
+  .std-caret{margin-left:8px;font-size:12px;color:var(--muted);transition:transform .18s}
+  .std-dom.open .std-caret{transform:rotate(180deg)}
+  .std-dom:not(.open) .std-dombody{display:none}
   .tile{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--acc,#cbd5e1);border-radius:12px;padding:14px 15px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;cursor:pointer;min-height:60px;transition:transform .12s,box-shadow .12s,border-color .12s}
   .tile:hover{border-color:var(--acc,var(--blue));transform:translateY(-2px);box-shadow:0 8px 20px rgba(30,41,59,.1)}
   .tile .tdot{width:10px;height:10px;border-radius:50%;background:var(--acc,#9aa7b5);flex-shrink:0}
@@ -216,11 +222,6 @@
         <a data-p="system" data-g="sysdoc">안전보건체계문서</a>
       </div>
 
-      <div class="grp grp-done">✅ 도메인 · 개발완료</div>
-      <div id="dom-done"></div>
-      <div id="done-empty" class="dom-empty">완료 항목 없음 · 각 항목 옆 [완료]를 누르면 여기로 올라옵니다</div>
-
-      <div class="grp grp-todo">🛠 도메인 · 개발예정</div>
       <div id="dom-todo">
         <div class="dom-block" data-dom="plan">
           <a class="navtop" data-p="plan" data-grp="plan">📋 기획<span class="caret">▾</span></a>
@@ -536,10 +537,10 @@
   function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function tile(cls,name){return `<div class="tile ${cls}" onclick="openItem('${esc(name)}')"><div class="nm">${esc(dispName(name))}</div><span class="tarrow">›</span></div>`;}
   function renderTiles(){
-    var m=itemDoneMap();
+    var m=itemDoneMap(); // m[nm]=1 → 확정된 항목(도메인 페이지에 노출)
     Object.keys(D).forEach(function(k){
       var host=document.getElementById(TID[k]); if(!host) return;
-      var items=D[k].filter(function(nm){return !m[nm];});
+      var items=(k==='sysdoc'||k==='sysplan') ? D[k] : D[k].filter(function(nm){return m[nm];});
       host.innerHTML=items.map(function(n){return tile(CLS[k],n);}).join('');
       if(k==='sysdoc'||k==='sysplan') return;
       var cnt=document.querySelector('.group[data-grp="'+k+'"] .ghead .cnt');
@@ -553,13 +554,13 @@
     var m=itemDoneMap();
     document.querySelectorAll('.subnav > a[data-g]').forEach(function(a){
       var g=a.dataset.g; if(!g||!D[g]||!GRP_LABEL[g]) return;
-      var nd=D[g].filter(function(nm){return !m[nm];}).length;
+      var nd=D[g].filter(function(nm){return m[nm];}).length;
       var mc=a.querySelector('.mcaret');
       a.textContent=GRP_LABEL[g]+' ('+nd+')';
       if(mc) a.appendChild(mc);
     });
     Object.keys(DOM_GROUPS).forEach(function(p){
-      var n=DOM_GROUPS[p].reduce(function(s,g){return s+((D[g]||[]).filter(function(nm){return !m[nm];}).length);},0);
+      var n=DOM_GROUPS[p].reduce(function(s,g){return s+((D[g]||[]).filter(function(nm){return m[nm];}).length);},0);
       var a=document.querySelector('.nav a.navtop[data-p="'+p+'"]'); if(!a) return;
       var c=a.querySelector('.cnt-nav'); if(!c){ c=document.createElement('span'); c.className='cnt-nav'; var caret=a.querySelector('.caret'); if(caret)a.insertBefore(c,caret); else a.appendChild(c); }
       c.textContent='('+n+')';
@@ -585,7 +586,7 @@
     updateNavCounts();
     if(typeof applyItemRenames==='function') applyItemRenames();
     if(typeof renderTiles==='function') renderTiles();
-    document.querySelectorAll('.subsub a[data-item]').forEach(function(el){ el.classList.toggle('done', !!m[el.dataset.item]); });
+    document.querySelectorAll('.subsub a[data-item]').forEach(function(el){ el.classList.toggle('done', !m[el.dataset.item]); });
     var host=document.getElementById('dom-done'); if(!host) return;
     var out='', any=false;
     Object.keys(DOM_GROUPS).forEach(function(dm){
@@ -1858,9 +1859,6 @@
     D[g].forEach(function(nm){
       const it=document.createElement('a'); it.dataset.item=nm; it.textContent=(typeof dispName==='function'?dispName(nm):nm);
       it.addEventListener('click',function(e){ e.stopPropagation(); openItem(nm); });
-      const tg=document.createElement('span'); tg.className='leaf-tog'; tg.textContent='완료';
-      tg.addEventListener('click',function(e){ toggleItemDone(nm,e); });
-      it.appendChild(tg);
       box.appendChild(it);
     });
     a.insertAdjacentElement('afterend', box);
@@ -2045,8 +2043,7 @@
   function addNavItem(g,nm){ var box=navBox(g); if(!box) return; if(Array.prototype.some.call(box.querySelectorAll('a[data-item]'),function(a){return a.dataset.item===nm;})) return;
     var it=document.createElement('a'); it.dataset.item=nm; it.textContent=dispName(nm);
     it.addEventListener('click',function(e){ e.stopPropagation(); openItem(nm); });
-    var tg=document.createElement('span'); tg.className='leaf-tog'; tg.textContent='완료'; tg.addEventListener('click',function(e){ toggleItemDone(nm,e); });
-    it.appendChild(tg); box.appendChild(it); }
+    box.appendChild(it); }
   function stdAddItem(){ var g=(document.getElementById('std-add-g')||{}).value; var nm=((document.getElementById('std-add-n')||{}).value||'').trim();
     if(!g||!nm){ if(window.toast) toast('그룹과 항목명을 입력하세요'); return; }
     if(D[g] && D[g].indexOf(nm)>=0){ if(window.toast) toast('이미 있는 항목입니다'); return; }
@@ -2068,6 +2065,9 @@
   // 확정본 파일 내보내기(std_data.js): 같은 폴더에 두면 새 창/다른 PC 유지 + 담당(Claude)이 확인 가능
   function stdExport(){ var js='window.STD_DATA = '+JSON.stringify(stdOvAll())+';\n'; var b=new Blob([js],{type:'text/javascript'}),u=URL.createObjectURL(b); var a=document.createElement('a'); a.href=u; a.download='std_data.js'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u);},1500); if(window.toast)toast('std_data.js 저장 — 대시보드와 같은 폴더에 두세요'); }
   var STD_EDIT=null;
+  var STD_TAB='std';
+  function stdSetTab(t){ STD_TAB=t; STD_EDIT=null; STD_FLOW_EDIT=null; STD_FLOW_BUF=[]; stdRender(); }
+  function stdToggleConfirm(name){ var m=itemDoneMap(); if(m[name]) delete m[name]; else m[name]=1; itemDoneSave(m); if(typeof renderDevStatus==='function') renderDevStatus(); stdRender(); if(window.toast) toast((m[name]?'확정 — 도메인 화면 노출: ':'확정 해제: ')+dispName(name)); }
   function stdEdit(name){ STD_EDIT=name; var f=stdEffFlow(name); STD_FLOW_BUF=(f&&f.length)?JSON.parse(JSON.stringify(f)):flowFromItem(name); if(!STD_FLOW_BUF.length) STD_FLOW_BUF=[['','']]; stdRender(); var el=document.getElementById('std-e-name'); if(el) el.focus(); }
   function stdCancel(){ STD_EDIT=null; STD_FLOW_BUF=[]; stdRender(); }
   function stdSave(name){
@@ -2075,12 +2075,10 @@
     var docs=(document.getElementById('std-e-docs')||{}).value||'';
     var memo=(document.getElementById('std-e-memo')||{}).value||'';
     var nmv=(document.getElementById('std-e-name')||{}).value; nmv=(nmv==null?name:String(nmv)).trim();
-    var p3={}; P3_PLANTS.forEach(function(pl,pi){ var v=(document.getElementById('std-e-p3-'+pi)||{}).value||''; if(v.trim())p3[pl]=v.trim(); });
-    stdFlowCapture(); var farr=stdFlowClean();
     var o=JSON.parse(JSON.stringify(stdOvAll())); if(!o[name]) o[name]={};
-    o[name].law=law.trim(); o[name].docs=docs.trim(); o[name].memo=memo.trim(); o[name].p3=p3;
-    if(farr.length){ o[name].flow=farr; } else { delete o[name].flow; }
-    delete o[name].flowStatus;
+    o[name].law=law.trim(); o[name].docs=docs.trim(); o[name].memo=memo.trim();
+    if(document.getElementById('std-e-p3-0')){ var p3={}; P3_PLANTS.forEach(function(pl,pi){ var v=(document.getElementById('std-e-p3-'+pi)||{}).value||''; if(v.trim())p3[pl]=v.trim(); }); o[name].p3=p3; }
+    if(document.getElementById('sf-t-0')){ stdFlowCapture(); var farr=stdFlowClean(); if(farr.length){ o[name].flow=farr; } else { delete o[name].flow; } delete o[name].flowStatus; }
     stdOvSave(o);
     var ren=itemRenameAll(); var rchg=false; if(nmv && nmv!==name){ if(ren[name]!==nmv){ ren[name]=nmv; rchg=true; } } else if(ren[name]){ delete ren[name]; rchg=true; }
     if(rchg) itemRenameSave(ren);
@@ -2092,15 +2090,25 @@
   function stdFlowSeedFromProc(name){ var base=flowFromItem(name); if(!base.length) base=[['현황·대상 파악',''],['계획 수립',''],['실행·조치',''],['점검·개선',''],['기록·보고','']]; if(STD_FLOW_BUF.length && STD_FLOW_BUF.some(function(s){return s[0];})){ if(!confirm('현재 입력한 단계를 지우고 절차서 기반 초안으로 채울까요?')) return; } STD_FLOW_BUF=JSON.parse(JSON.stringify(base)); stdRender(); var el=document.getElementById('sf-t-0'); if(el) el.focus(); if(window.toast) toast('절차서 기반 초안을 불러왔습니다 — 수정 후 저장하세요'); }
   function stdReset(name){ var o=JSON.parse(JSON.stringify(stdOvAll())); if(o[name]){ var f=o[name].flow, fs=o[name].flowStatus; delete o[name]; if(f){ o[name]={flow:f, flowStatus:fs}; } } stdOvSave(o); STD_EDIT=null; stdRender(); if(window.toast) toast('초안으로 되돌림(법령·절차서·메모): '+name); }
   // ── 업무 Flow 편집 상태/조작 함수
-  var STD_FLOW_EDIT=null, STD_FLOW_BUF=[];
-  function stdFlowCapture(){ if(STD_EDIT===null && STD_FLOW_EDIT===null) return; STD_FLOW_BUF=STD_FLOW_BUF.map(function(s,i){ var t=(document.getElementById('sf-t-'+i)||{}).value; var sub=(document.getElementById('sf-s-'+i)||{}).value; return [t!=null?t:(s[0]||''), sub!=null?sub:(s[1]||'')]; }); }
-  function stdFlowEdit(name){ STD_FLOW_EDIT=name; var f=stdEffFlow(name); STD_FLOW_BUF=(f&&f.length)?JSON.parse(JSON.stringify(f)):flowFromItem(name); if(!STD_FLOW_BUF.length) STD_FLOW_BUF=[['','']]; STD_EDIT=null; stdRender(); var el=document.getElementById('sf-t-0'); if(el) el.focus(); }
-  function stdFlowCancel(){ STD_FLOW_EDIT=null; STD_FLOW_BUF=[]; stdRender(); }
+  var STD_FLOW_EDIT=null, STD_FLOW_BUF=[], STD_P3_BUF={};
+  function stdP3Capture(){ if(!document.getElementById('sf-p3-0')) return; var p={}; P3_PLANTS.forEach(function(pl,pi){ var v=(document.getElementById('sf-p3-'+pi)||{}).value||''; if(v.trim())p[pl]=v.trim(); }); STD_P3_BUF=p; }
+  function stdFlowCapture(){ if(STD_EDIT===null && STD_FLOW_EDIT===null) return; STD_FLOW_BUF=STD_FLOW_BUF.map(function(s,i){ var t=(document.getElementById('sf-t-'+i)||{}).value; var sub=(document.getElementById('sf-s-'+i)||{}).value; return [t!=null?t:(s[0]||''), sub!=null?sub:(s[1]||'')]; }); stdP3Capture(); }
+  function stdFlowEdit(name){ STD_FLOW_EDIT=name; var f=stdEffFlow(name); STD_FLOW_BUF=(f&&f.length)?JSON.parse(JSON.stringify(f)):flowFromItem(name); if(!STD_FLOW_BUF.length) STD_FLOW_BUF=[['','']]; STD_P3_BUF=JSON.parse(JSON.stringify(p3Map(name))); STD_EDIT=null; stdRender(); var el=document.getElementById('sf-t-0'); if(el) el.focus(); }
+  function stdFlowCancel(){ STD_FLOW_EDIT=null; STD_FLOW_BUF=[]; STD_P3_BUF={}; stdRender(); }
   function stdFlowAdd(){ stdFlowCapture(); STD_FLOW_BUF.push(['','']); stdRender(); var el=document.getElementById('sf-t-'+(STD_FLOW_BUF.length-1)); if(el) el.focus(); }
   function stdFlowDel(i){ stdFlowCapture(); STD_FLOW_BUF.splice(i,1); if(!STD_FLOW_BUF.length) STD_FLOW_BUF=[['','']]; stdRender(); }
   function stdFlowMove(i,dir){ stdFlowCapture(); var j=i+dir; if(j<0||j>=STD_FLOW_BUF.length) return; var t=STD_FLOW_BUF[i]; STD_FLOW_BUF[i]=STD_FLOW_BUF[j]; STD_FLOW_BUF[j]=t; stdRender(); }
   function stdFlowClean(){ return STD_FLOW_BUF.map(function(s){ return [String(s[0]||'').trim(), String(s[1]||'').trim()]; }).filter(function(s){ return s[0]; }); }
-  function stdFlowSaveDraft(name){ stdFlowCapture(); var arr=stdFlowClean(); if(!arr.length){ if(window.toast) toast('단계를 1개 이상 입력하세요'); return; } stdFlowSet(name, arr, '초안'); STD_FLOW_EDIT=null; STD_FLOW_BUF=[]; stdRender(); if(window.toast) toast('Flow 초안 저장: '+name); }
+  function stdFlowSaveDraft(name){ stdFlowCapture(); var arr=stdFlowClean();
+    var o=JSON.parse(JSON.stringify(stdOvAll())); if(!o[name]) o[name]={};
+    if(arr.length){ o[name].flow=arr; } else { delete o[name].flow; }
+    delete o[name].flowStatus;
+    if(document.getElementById('sf-p3-0')){ var p3={}; P3_PLANTS.forEach(function(pl,pi){ var v=(document.getElementById('sf-p3-'+pi)||{}).value||''; if(v.trim())p3[pl]=v.trim(); }); o[name].p3=p3; }
+    stdOvSave(o);
+    STD_FLOW_EDIT=null; STD_FLOW_BUF=[];
+    if(typeof renderDevStatus==='function') renderDevStatus(); stdRender();
+    if(typeof curItem!=='undefined' && curItem===name && typeof openItem==='function'){ openItem(name); }
+    if(window.toast) toast('Flow·P3 저장: '+dispName(name)); }
   function stdFlowConfirm(name){ var f=stdEffFlow(name); if(!f||!f.length){ if(window.toast) toast('먼저 [수정]에서 Flow를 작성하세요'); return; } if(!confirm(dispName(name)+' 업무 Flow를 확정할까요?\n확정하면 항목 상세에 반영됩니다.')) return; stdFlowSet(name, f, '확정'); stdRender(); if(window.toast) toast('Flow 확정: '+dispName(name)); }
   function stdFlowUnconfirm(name){ var f=stdEffFlow(name); if(!f) return; stdFlowSet(name, f, '초안'); stdRender(); if(window.toast) toast('Flow 확정 해제: '+name); }
   function stdFlowReset(name){ if(!confirm(name+' Flow 기준정보를 삭제할까요?\n삭제하면 항목 상세는 원래 기본 Flow로 돌아갑니다.')) return; stdFlowClear(name); if(STD_FLOW_EDIT===name){ STD_FLOW_EDIT=null; STD_FLOW_BUF=[]; } stdRender(); if(window.toast) toast('Flow 기준정보 삭제: '+name); }
@@ -2112,13 +2120,14 @@
       return '<span class="pill" style="background:#eef0f4;color:#333;margin:1px 2px">'+esc(c)+'</span>';
     }).join('');
   }
+  function stdToggleDom(h){ var d=h.closest('.std-dom'); if(d) d.classList.toggle('open'); }
   function stdRender(){
     var host=document.getElementById('std-body'); if(!host) return;
     var q=((document.getElementById('stdq')||{}).value||'').toLowerCase();
     var out='';
     STD_ORDER.forEach(function(dom){
       var domName=dom[0], domClr=dom[1], groups=dom[2];
-      var rows='';
+      var rows='', domCount=0;
       groups.forEach(function(gp){
         var g=gp[0], glabel=gp[1], items=D[g]||[];
         var itemRows='';
@@ -2126,48 +2135,69 @@
           var law=stdEffLaw(name,g), docs=stdEffDocs(name,g), memo=stdEffMemo(name), ov=stdIsOv(name);
           var hay=(name+' '+dispName(name)+' '+law+' '+docs.join(' ')+' '+memo).toLowerCase();
           if(q && hay.indexOf(q)<0) return;
+          domCount++;
           var nq=name.replace(/'/g,"\\'");
-          if(STD_EDIT===name){
+          if(STD_TAB==='flow'){
+            // ===== 업무 Flow 탭 — 절차 단계만 (카드) =====
+            var _fo=stdOvAll()[name]||{}; var _hasF=_fo.flow&&_fo.flow.length; var _fstat=_hasF?(_fo.flowStatus||'초안'):'기본';
+            var _fpill=_fstat==='확정'?'<span class="pill g" style="font-size:10px">Flow 확정</span>':(_fstat==='초안'?'<span class="pill a" style="font-size:10px">Flow 초안</span>':'<span class="tag" style="font-size:10px">기본</span>');
+            var _dtag=docs.length?' · '+esc(docs.join(', ')):'';
+            if(STD_FLOW_EDIT===name){
+              var _docsStr=(docs.join(', '))||'(지정 절차서 없음 — 기준정보 탭에서 지정)';
+              var _stepsE=STD_FLOW_BUF.map(function(s,i){ return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
+                +'<span style="font-size:11px;color:#788699;width:46px;flex:none">STEP '+(i+1)+'</span>'
+                +'<input id="sf-t-'+i+'" value="'+esc(s[0]||'')+'" placeholder="단계 제목" style="flex:2;min-width:150px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px">'
+                +'<input id="sf-s-'+i+'" value="'+esc(s[1]||'')+'" placeholder="부제(선택·담당/주기 등)" style="flex:2;min-width:130px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:11px">'
+                +'<button class="btn ghost sm" onclick="stdFlowMove('+i+',-1)" title="위로">↑</button>'
+                +'<button class="btn ghost sm" onclick="stdFlowMove('+i+',1)" title="아래로">↓</button>'
+                +'<button class="btn ghost sm" onclick="stdFlowDel('+i+')" title="삭제">✕</button></div>'; }).join('');
+              var _p3E=P3_PLANTS.map(function(pl,pi){var mm=STD_P3_BUF||{};return '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px"><span style="font-size:10px;color:#788699;width:36px;flex:none">'+pl+'</span><input id="sf-p3-'+pi+'" value="'+esc(mm[pl]||'')+'" placeholder="P3 태스크 링크(비우면 없음)" style="flex:1;min-width:220px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:11px"></div>';}).join('');
+              itemRows+='<div style="background:#fffef2;border:1px solid #f0e3a8;border-radius:10px;padding:12px 14px">'
+                +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px"><b style="font-size:13px">🧭 '+esc(dispName(name))+' — 업무 Flow</b><span class="tag" style="font-size:10px">'+glabel+' · 절차서 「'+esc(_docsStr)+'」 기준</span></div>'
+                +_stepsE
+                +'<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e6dca0"><div style="font-size:11px;color:#8a7f3d;margin-bottom:4px">📌 P3 태스크 링크(공장별)</div>'+_p3E+'</div>'
+                +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" onclick="stdFlowSaveDraft(\''+nq+'\')">💾 저장</button><button class="btn ghost sm" onclick="stdFlowCancel()">취소</button><button class="btn ghost sm" onclick="stdFlowAdd()">+ 단계 추가</button><button class="btn sm" onclick="stdFlowSeedFromProc(\''+nq+'\')" title="지정 절차서 기반 기본 초안으로 채우기">🪄 절차서 기반 초안</button>'+(stdEffFlow(name)?'<button class="btn ghost sm" onclick="stdFlowReset(\''+nq+'\')" title="Flow 삭제(기본으로 복귀)">🗑 기본으로</button>':'')+'</div>'
+                +'</div>';
+            } else {
+              var _fm=p3Map(name); var _fmk=Object.keys(_fm);
+              var _p3flow=_fmk.length?_fmk.map(function(pl){ return '<a href="'+_fm[pl]+'" target="_blank" rel="noopener" class="pill" style="text-decoration:none;background:#eaf7ee;color:#1f8a4c;font-size:10px;margin:1px;display:inline-block" title="P3 '+pl+'">'+(pl==='공통'?'🗂 P3':'P3 '+pl)+' ›</a>'; }).join(''):'<span class="tag" style="font-size:10px">P3 —</span>';
+              itemRows+='<div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px">'
+                +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><b style="font-size:13px">'+esc(dispName(name))+'</b><span class="tag" style="font-size:10px">'+glabel+_dtag+'</span>'+_p3flow+'<span style="flex:1"></span>'
+                +'<button class="btn ghost sm" onclick="stdFlowEdit(\''+nq+'\')">Flow 수정</button></div>'
+                +stdFlowRowHTML(name)+'</div>';
+            }
+          } else if(STD_EDIT===name){
+            // ===== 기준정보 탭 — 편집(법령·절차서·메모·P3만) =====
             itemRows+='<tr style="background:#fffbe6"><td class="tag">'+glabel+'</td>'
               +'<td><input id="std-e-name" value="'+esc(dispName(name))+'" title="항목 표시명(라벨) — 내부 연결은 유지됩니다" style="width:100%;box-sizing:border-box;border:1px solid #2159c9;border-radius:6px;padding:5px 7px;font-size:12px;font-weight:600"></td>'
               +'<td><input id="std-e-law" value="'+esc(law)+'" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px"></td>'
               +'<td><input id="std-e-docs" value="'+esc(docs.join(', '))+'" placeholder="예: I-EHS-04, I-EHS-03" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px"></td>'
-              +'<td>'+P3_PLANTS.map(function(pl,pi){var mm=p3Map(name);return '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px"><span style="font-size:10px;color:#788699;width:28px;flex:none">'+pl+'</span><input id="std-e-p3-'+pi+'" value="'+esc(mm[pl]||'')+'" placeholder="링크(비우면 없음)" style="flex:1;min-width:150px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:11px"></div>';}).join('')+'</td>'
               +'<td><input id="std-e-memo" value="'+esc(memo)+'" placeholder="메모(변경 사유 등)" style="width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:11px"></td>'
               +'<td><span class="pill" style="background:#2159c9;color:#fff;font-size:10px">편집중</span></td>'
               +'<td style="white-space:nowrap"><button class="btn sm" onclick="stdSave(\''+nq+'\')">💾 저장</button> <button class="btn ghost sm" onclick="stdCancel()">취소</button></td></tr>';
-            var _docsE = (document.getElementById('std-e-docs')||{}).value; var _docsStr = (_docsE!=null?_docsE:docs.join(', '))||'(지정 절차서 없음 — 「관련 절차서」 칸에서 지정)';
-            var _stepsE = STD_FLOW_BUF.map(function(s,i){ return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
-              +'<span style="font-size:11px;color:#788699;width:46px;flex:none">STEP '+(i+1)+'</span>'
-              +'<input id="sf-t-'+i+'" value="'+esc(s[0]||'')+'" placeholder="단계 제목" style="flex:2;min-width:150px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px">'
-              +'<input id="sf-s-'+i+'" value="'+esc(s[1]||'')+'" placeholder="부제(선택·담당/주기 등)" style="flex:2;min-width:130px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:11px">'
-              +'<button class="btn ghost sm" onclick="stdFlowMove('+i+',-1)" title="위로">↑</button>'
-              +'<button class="btn ghost sm" onclick="stdFlowMove('+i+',1)" title="아래로">↓</button>'
-              +'<button class="btn ghost sm" onclick="stdFlowDel('+i+')" title="삭제">✕</button></div>'; }).join('');
-            itemRows+='<tr style="background:#fffef2"><td colspan="8" style="padding:10px 14px 14px">'
-              +'<div style="font-weight:600;font-size:12px;margin-bottom:3px">🧭 업무 Flow — 지정 절차서 「'+esc(_docsStr)+'」 기준으로 단계를 작성하세요</div>'
-              +'<div class="tag" style="font-size:11px;margin-bottom:9px">지정 절차서 기준으로 단계를 작성하고 [💾 저장]하면 항목 상세에 바로 반영됩니다.</div>'
-              +_stepsE
-              +'<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost sm" onclick="stdFlowAdd()">+ 단계 추가</button><button class="btn sm" onclick="stdFlowSeedFromProc(\''+nq+'\')" title="지정 절차서 기반 기본 초안으로 채우기">🪄 절차서 기반 초안 생성</button>'+(stdEffFlow(name)?'<button class="btn ghost sm" onclick="stdFlowReset(\''+nq+'\')" title="기준정보 Flow 삭제(기본으로 복귀)">🗑 기본으로</button>':'')+'</div>'
-              +'</td></tr>';
           } else {
-            var stat = ov ? '<span class="pill g" style="font-size:10px">확정</span>' : '<span class="pill a" style="font-size:10px">확정 대기</span>';
+            var _conf = !!itemDoneMap()[name];
+            var stat = _conf ? '<span class="pill g" style="font-size:10px">확정</span>' : '<span class="pill a" style="font-size:10px">미확정</span>';
             var _cust = isCustomItem(name);
             var mgmt = '<button class="btn ghost sm" onclick="stdEdit(\''+nq+'\')">수정</button>'
-                     + (ov ? ' <button class="btn ghost sm" onclick="stdReset(\''+nq+'\')" title="초안으로">↺</button>' : '')
+                     + (_conf ? ' <button class="btn ghost sm" onclick="stdToggleConfirm(\''+nq+'\')" title="확정 해제(도메인 화면에서 내림)">확정해제</button>'
+                              : ' <button class="btn sm" onclick="stdToggleConfirm(\''+nq+'\')" title="확정 — 안전·보건·환경·기획 화면에 노출">✔ 확정</button>')
                      + (_cust ? ' <button class="btn ghost sm" onclick="stdDelItem(\''+nq+'\',\''+g+'\')" title="추가한 항목 삭제">✕</button>' : '');
-            var _m=p3Map(name); var _mk=Object.keys(_m); var p3cell = _mk.length ? _mk.map(function(pl){ return '<a href="'+_m[pl]+'" target="_blank" rel="noopener" class="pill" style="text-decoration:none;background:#eaf7ee;color:#1f8a4c;font-size:10px;margin:1px;display:inline-block" title="P3 '+pl+'">'+(pl==='공통'?'🗂 열기':pl)+' ›</a>'; }).join('') : '<span class="tag">—</span>';
             itemRows+='<tr><td class="tag">'+glabel+'</td><td><b>'+esc(dispName(name))+'</b>'+(_cust?' <span class="tag" style="font-size:9px;color:#2159c9">추가</span>':'')+'</td><td>'+esc(law)+'</td><td>'+stdDocChips(docs)+'</td>'
-              +'<td style="text-align:center">'+p3cell+'</td>'
               +'<td class="tag" style="font-size:11px;color:var(--muted)">'+esc(memo||'—')+'</td><td style="text-align:center;white-space:nowrap">'+stat+'</td><td style="white-space:nowrap">'+mgmt+'</td></tr>';
-            itemRows+='<tr><td colspan="8" style="padding:3px 14px 11px;border-top:none;background:#fbfcfe">'+stdFlowRowHTML(name)+'</td></tr>';
           }
         });
         rows+=itemRows;
       });
       if(!rows) return;
-      out+='<div class="ghead" style="margin:'+ (out?'18px':'2px') +' 0 6px"><span class="swatch" style="background:'+domClr+'"></span> '+domName+'</div>'
-        +'<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:200px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:104px;text-align:center">P3 태스크</th><th style="width:158px">현행 근거 메모</th><th style="width:84px;text-align:center;white-space:nowrap">상태</th><th style="width:110px">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      var _open = q ? ' open' : '';
+      var _inner = (STD_TAB==='flow')
+        ? '<div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 4px">'+rows+'</div>'
+        : '<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:200px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:170px">현행 근거 메모</th><th style="width:84px;text-align:center;white-space:nowrap">상태</th><th style="width:120px">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      out+='<div class="std-dom'+_open+'">'
+        +'<div class="ghead std-domhead" style="margin:'+ (out?'18px':'2px') +' 0 6px" onclick="stdToggleDom(this)"><span class="swatch" style="background:'+domClr+'"></span> '+domName+' <span class="std-domcnt">('+domCount+')</span><span class="std-caret">▾</span></div>'
+        +'<div class="std-dombody">'+_inner+'</div>'
+        +'</div>';
     });
     var _gopts=Object.keys(GRP_LABEL).map(function(gk){return '<option value="'+gk+'">'+esc(GRP_LABEL[gk])+'</option>';}).join('');
     var tb='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
@@ -2176,7 +2206,12 @@
       +'<input id="std-add-n" placeholder="새 항목명" onkeydown="if(event.key===\'Enter\')stdAddItem()" style="border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12px;width:160px">'
       +'<button class="btn sm" onclick="stdAddItem()">추가</button></div>'
       +'<button class="btn ghost sm" onclick="stdExport()" title="확정한 기준을 파일로 내보내 공유·유지(담당 확인용)">💾 확정본 내보내기(std_data.js)</button></div>';
-    host.innerHTML=tb+(out||'<p class="tag">검색 결과 없음</p>');
+    var _tA='padding:8px 16px;border:none;background:none;font-size:13px;font-weight:700;color:#2159c9;border-bottom:2px solid #2159c9;cursor:pointer';
+    var _tI='padding:8px 16px;border:none;background:none;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer';
+    var tabbar='<div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--line)">'
+      +'<button onclick="stdSetTab(\'std\')" style="'+(STD_TAB==='std'?_tA:_tI)+'">📋 기준정보</button>'
+      +'<button onclick="stdSetTab(\'flow\')" style="'+(STD_TAB==='flow'?_tA:_tI)+'">🧭 업무 Flow</button></div>';
+    host.innerHTML=tabbar+tb+(out||'<p class="tag">검색 결과 없음</p>');
   }
 
   function showLawModal(gov,name){
