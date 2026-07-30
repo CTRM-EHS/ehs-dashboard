@@ -211,6 +211,56 @@
 </style>
 </head>
 <body>
+<!-- ===== 비밀번호 잠금화면 (세션 유지) ===== -->
+<style>
+  #pwd-gate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#22415f 0%,#2e567b 100%);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+  #pwd-gate .pwd-box{width:340px;max-width:90vw;background:#fff;border-radius:14px;padding:34px 30px 28px;
+    box-shadow:0 12px 40px rgba(0,0,0,.28);text-align:center}
+  #pwd-gate .pwd-logo{font-size:20px;font-weight:800;color:#22415f;margin-bottom:4px}
+  #pwd-gate .pwd-sub{font-size:12px;color:#788699;margin-bottom:22px}
+  #pwd-gate input{width:100%;padding:12px 14px;font-size:15px;border:1.5px solid #dfe5ee;border-radius:9px;
+    outline:none;margin-bottom:12px}
+  #pwd-gate input:focus{border-color:#3b78ef}
+  #pwd-gate button{width:100%;padding:12px;font-size:15px;font-weight:700;color:#fff;background:#2f5fb0;
+    border:none;border-radius:9px;cursor:pointer}
+  #pwd-gate button:hover{background:#22415f}
+  #pwd-gate .pwd-err{color:#e35d54;font-size:12px;height:16px;margin-top:8px}
+</style>
+<div id="pwd-gate">
+  <div class="pwd-box">
+    <div class="pwd-logo">CTR EHS 업무포탈</div>
+    <div class="pwd-sub">접속하려면 비밀번호를 입력하세요</div>
+    <input type="password" id="pwd-input" placeholder="비밀번호" autocomplete="off" autofocus>
+    <button type="button" id="pwd-btn">들어가기</button>
+    <div class="pwd-err" id="pwd-err"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var PWD = "2026ehs";              // 비밀번호
+  var KEY = "ehs_portal_unlocked";  // 세션 저장 키
+  var gate = document.getElementById('pwd-gate');
+  var input = document.getElementById('pwd-input');
+  var btn = document.getElementById('pwd-btn');
+  var err = document.getElementById('pwd-err');
+  // 이미 이 세션에서 인증했으면 바로 통과
+  try{ if(sessionStorage.getItem(KEY)==="1"){ gate.style.display="none"; return; } }catch(e){}
+  function tryUnlock(){
+    if(input.value === PWD){
+      try{ sessionStorage.setItem(KEY,"1"); }catch(e){}
+      gate.style.display="none";
+    }else{
+      err.textContent="비밀번호가 올바르지 않습니다.";
+      input.value=""; input.focus();
+    }
+  }
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e){ if(e.key==="Enter") tryUnlock(); });
+  input.focus();
+})();
+</script>
+<!-- ===== /비밀번호 잠금화면 ===== -->
 <div class="app">
   <aside class="side">
     <div class="brand"><div class="logo"><img src="ctr_logo.png" class="logoimg" alt="CTR"><span class="logotxt">EHS 업무포탈</span></div></div>
@@ -1689,9 +1739,11 @@
       return;
     }
     { var _dg=document.getElementById('d-gov'); if(_dg)_dg.textContent=''; }
-    document.getElementById('d-flow').innerHTML=d.flow.map((s,i)=>
-      `<div class="fstep"><div class="sn">STEP ${s[0]}</div><div class="st">${s[1]}</div></div>`+
-      (i<d.flow.length-1?'<div class="farrow">▶</div>':'')).join('');
+    var _ovf=null; try{ _ovf=stdEffFlow(name); }catch(e){}
+    var _flowArr=(_ovf&&_ovf.length)? _ovf.map(function(s,i){return [String(i+1), s[0], s[1]||''];}) : (d.flow||[]);
+    document.getElementById('d-flow').innerHTML=_flowArr.map((s,i)=>
+      `<div class="fstep"><div class="sn">STEP ${s[0]}</div><div class="st">${esc(s[1]||'')}</div>${s[2]?`<div class="so">${esc(s[2])}</div>`:''}</div>`+
+      (i<_flowArr.length-1?'<div class="farrow">▶</div>':'')).join('');
     curD=d;
     renderFiles(d);
     document.getElementById('d-src').textContent=d.src||'';
@@ -2053,7 +2105,7 @@
     if(!f||!f.length){ var d=itemData[name]; if(d&&d.flow&&d.flow.length){ f=d.flow.map(function(s){return [s[1]||''];}); base=true; } }
     if(!f||!f.length) return '<span style="color:#aab3c2;font-size:11px">Flow 미작성 — [Flow 수정]에서 작성하세요</span>';
     var chips=f.map(function(s,i){ return '<span style="display:inline-flex;align-items:center;gap:7px;margin:2px 0">'
-      +'<span style="background:#eef3fb;border:1px solid #d8e4f4;border-radius:7px;padding:4px 11px;font-size:11.5px;color:#264a7a">'+(i+1)+'. '+esc(s[0])+'</span>'
+      +'<span style="background:#eef3fb;border:1px solid #d8e4f4;border-radius:7px;padding:4px 11px;font-size:11.5px;color:#264a7a">'+(i+1)+'. '+esc(s[0])+(s[1]?' <span style="color:#6b83a6;font-size:10.5px">· '+esc(s[1])+'</span>':'')+'</span>'
       +(i<f.length-1?'<span style="color:#9bb0cc;font-size:11px">▶</span>':'')+'</span>'; }).join(' ');
     return (base?'<span style="font-size:10px;color:#8a97a8;margin-right:8px">기본</span>':'')+chips; }
   // ── 사용자 추가 항목(그룹별) — localStorage. 로드시 D에 병합되어 메뉴·카드·표 전체 반영
@@ -2089,6 +2141,20 @@
   var STD_TAB='std';
   function stdSetTab(t){ STD_TAB=t; STD_EDIT=null; STD_FLOW_EDIT=null; STD_FLOW_BUF=[]; stdRender(); }
   function stdToggleConfirm(name){ var m=itemDoneMap(); if(m[name]) delete m[name]; else m[name]=1; itemDoneSave(m); if(typeof renderDevStatus==='function') renderDevStatus(); stdRender(); if(window.toast) toast((m[name]?'확정 — 도메인 화면 노출: ':'확정 해제: ')+dispName(name)); }
+  // ===== 기준정보 파일 첨부 =====
+  // [저장 계층] 지금은 임시로 브라우저(localStorage)에 저장. 추후 DB/SharePoint 연동 시 아래 attachAll/attachSave 본문만 교체하면 됨.
+  function attachAll(){ try{ var ls=localStorage.getItem('ehs_attach'); if(ls) return JSON.parse(ls); }catch(e){} return {}; }
+  function attachSave(o){ try{ localStorage.setItem('ehs_attach', JSON.stringify(o)); return true; }catch(e){ alert('브라우저 저장 용량 초과 — 이 파일은 추후 DB/쉐어포인트 연동 시 저장하세요.'); return false; } }
+  function attachPick(key){ var inp=document.createElement('input'); inp.type='file'; inp.style.display='none';
+    inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f) return;
+      if(f.size>2*1024*1024){ alert('현재는 임시로 브라우저에 저장하므로 2MB 이하만 첨부됩니다.\n(추후 DB/쉐어포인트 연동 시 제한 해제)'); return; }
+      var r=new FileReader(); r.onload=function(){ var o=attachAll(); o[key]={name:f.name,type:f.type||'',size:f.size,data:r.result,at:(new Date()).toISOString().slice(0,10)}; if(attachSave(o)){ stdRender(); if(window.toast) toast('첨부: '+f.name); } }; r.readAsDataURL(f); };
+    document.body.appendChild(inp); inp.click(); setTimeout(function(){ if(inp.parentNode) inp.remove(); },2000); }
+  function attachOpen(key){ var a=attachAll()[key]; if(!a) return; var l=document.createElement('a'); l.href=a.data; l.download=a.name; document.body.appendChild(l); l.click(); l.remove(); }
+  function attachDel(key){ var a=attachAll()[key]; if(!a) return; if(!confirm((a.name||'첨부')+' 첨부를 삭제할까요?')) return; var o=attachAll(); delete o[key]; attachSave(o); stdRender(); if(window.toast) toast('첨부 삭제'); }
+  function attachCellHTML(key){ var a=attachAll()[key]; var kq=String(key).replace(/'/g,"\\'");
+    if(a){ var nm=a.name.length>16?a.name.slice(0,14)+'…':a.name; return '<span class="pill" style="background:#eef7ee;color:#1f8a4c;cursor:pointer;font-size:10px" title="'+esc(a.name)+' · 다운로드" onclick="attachOpen(\''+kq+'\')">📎 '+esc(nm)+'</span> <button class="btn ghost sm" title="첨부 삭제" onclick="attachDel(\''+kq+'\')">✕</button>'; }
+    return '<button class="btn ghost sm" title="파일 첨부(임시 브라우저 저장 · 추후 DB)" onclick="attachPick(\''+kq+'\')">📎 첨부</button>'; }
   function stdEdit(name){ STD_EDIT=name; var f=stdEffFlow(name); STD_FLOW_BUF=(f&&f.length)?JSON.parse(JSON.stringify(f)):flowFromItem(name); if(!STD_FLOW_BUF.length) STD_FLOW_BUF=[['','']]; stdRender(); var el=document.getElementById('std-e-name'); if(el) el.focus(); }
   function stdCancel(){ STD_EDIT=null; STD_FLOW_BUF=[]; stdRender(); }
   function stdSave(name){
@@ -2161,7 +2227,7 @@
           rows+='<tr><td class="tag">'+esc(dc.grp)+'</td><td><b>'+esc(dc.name)+'</b></td><td>'+esc(dc.law||'—')+'</td><td>'+codeCell+'</td>'
             +'<td class="tag" style="font-size:11px;color:var(--muted)">'+esc(dc.memo||'—')+'</td>'
             +'<td style="text-align:center"><span class="pill" style="background:#eef0f4;color:#555;font-size:10px">문서</span></td>'
-            +'<td style="white-space:nowrap"><button class="btn sm" onclick="'+openJs+'">열기 ↗</button></td></tr>';
+            +'<td style="white-space:nowrap">'+attachCellHTML(dc.code||dc.name)+' <button class="btn ghost sm" title="원본(SharePoint) 열기" onclick="'+openJs+'">열기 ↗</button></td></tr>';
         });
       }
       if(!_isSys) groups.forEach(function(gp){
@@ -2184,7 +2250,7 @@
               var _stepsE=STD_FLOW_BUF.map(function(s,i){ return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
                 +'<span style="font-size:11px;color:#788699;width:46px;flex:none">STEP '+(i+1)+'</span>'
                 +'<input id="sf-t-'+i+'" value="'+esc(s[0]||'')+'" placeholder="단계 제목" style="flex:2;min-width:150px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px">'
-                +'<input id="sf-s-'+i+'" value="'+esc(s[1]||'')+'" placeholder="부제(선택·담당/주기 등)" style="flex:2;min-width:130px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:11px">'
+                +'<input id="sf-s-'+i+'" value="'+esc(s[1]||'')+'" placeholder="담당·주기(예: 분기 1회 / EHS팀)" style="flex:2;min-width:130px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:11px">'
                 +'<button class="btn ghost sm" onclick="stdFlowMove('+i+',-1)" title="위로">↑</button>'
                 +'<button class="btn ghost sm" onclick="stdFlowMove('+i+',1)" title="아래로">↓</button>'
                 +'<button class="btn ghost sm" onclick="stdFlowDel('+i+')" title="삭제">✕</button></div>'; }).join('');
@@ -2219,7 +2285,8 @@
             var mgmt = '<button class="btn ghost sm" onclick="stdEdit(\''+nq+'\')">수정</button>'
                      + (_conf ? ' <button class="btn ghost sm" onclick="stdToggleConfirm(\''+nq+'\')" title="확정 해제(도메인 화면에서 내림)">확정해제</button>'
                               : ' <button class="btn sm" onclick="stdToggleConfirm(\''+nq+'\')" title="확정 — 안전·보건·환경·기획 화면에 노출">✔ 확정</button>')
-                     + (_cust ? ' <button class="btn ghost sm" onclick="stdDelItem(\''+nq+'\',\''+g+'\')" title="추가한 항목 삭제">✕</button>' : '');
+                     + (_cust ? ' <button class="btn ghost sm" onclick="stdDelItem(\''+nq+'\',\''+g+'\')" title="추가한 항목 삭제">✕</button>' : '')
+                     + ' '+attachCellHTML(name);
             itemRows+='<tr><td class="tag">'+glabel+'</td><td><b>'+esc(dispName(name))+'</b>'+(_cust?' <span class="tag" style="font-size:9px;color:#2159c9">추가</span>':'')+'</td><td>'+esc(law)+'</td><td>'+stdDocChips(docs)+'</td>'
               +'<td class="tag" style="font-size:11px;color:var(--muted)">'+esc(memo||'—')+'</td><td style="text-align:center;white-space:nowrap">'+stat+'</td><td style="white-space:nowrap">'+mgmt+'</td></tr>';
           }
@@ -2230,7 +2297,7 @@
       var _open = (q||STD_OPEN[domName]||domEditing) ? ' open' : '';
       var _inner = (STD_TAB==='flow')
         ? '<div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 4px">'+rows+'</div>'
-        : '<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:200px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:170px">현행 근거 메모</th><th style="width:84px;text-align:center;white-space:nowrap">상태</th><th style="width:120px">관리</th></tr></thead><tbody>'+rows+'</tbody></table>';
+        : '<table style="width:100%"><thead><tr><th style="width:54px">그룹</th><th style="width:150px">항목</th><th style="width:200px">관련 법령</th><th style="width:150px">관련 절차서</th><th style="width:150px">현행 근거 메모</th><th style="width:80px;text-align:center;white-space:nowrap">상태</th><th style="width:200px">관리 · 첨부</th></tr></thead><tbody>'+rows+'</tbody></table>';
       out+='<div class="std-dom'+_open+'" data-dom="'+esc(domName)+'">'
         +'<div class="ghead std-domhead" style="margin:'+ (out?'18px':'2px') +' 0 6px" onclick="stdToggleDom(this)"><span class="swatch" style="background:'+domClr+'"></span> '+domName+' <span class="std-domcnt">('+domCount+')</span><span class="std-caret">▾</span></div>'
         +'<div class="std-dombody">'+_inner+'</div>'
