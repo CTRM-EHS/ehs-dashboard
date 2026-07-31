@@ -749,7 +749,8 @@
     'ISO 프로세스':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스', reg:false, flow:PDCA, gov:'ISO 14001·45001 · I-EHS-09', desc:'ISO 통합경영시스템 프로세스·매뉴얼·지침서·인증서', src:'경로: 00. 기획 / 03. ISO 프로세스' },
     '조직 및 업무분장':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/04. 조직 및 업무분장', reg:false, flow:PDCA, gov:'EHS 조직·업무분장', desc:'EHS 조직도·업무분장 관리', src:'경로: 00. 기획 / 04. 조직 및 업무분장' },
     '선임':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/05. 선임', reg:false, flow:PDCA, gov:'법정 선임·백업플랜', desc:'법정 선임 현황·백업플랜 모니터링', src:'경로: 00. 기획 / 05. 선임' },
-    '예산':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/06. 예산', reg:false, flow:PDCA, gov:'안전보건예산 · I-EHS-04', desc:'EHS 예산 편성·집행 관리', src:'경로: 00. 기획 / 06. 예산' },
+    '예산':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/06. 예산', reg:false, gov:'I-EHS-04 ⅩⅨ. 안전보건예산 편성 및 집행 절차', desc:'EHS 예산 편성·집행 관리', src:'경로: 00. 기획 / 06. 예산',
+      flow:F('개선항목 발굴·의견취합|각 부서·제안제도','예산 편성·집행계획 수립|안전보건방침·추진계획 연동','편성계획 승인|경영책임자','예산 배정|항목별 기준·반기/분기','집행·모니터링|부서장 승인 후·안전관리자','실적 관리·차기년도 반영|효율성·투명성') },
     'EHS 법령 제개정':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/07. EHS 법령 제개정', reg:false, flow:PDCA, gov:'EHS 법령 제·개정 관리', desc:'EHS 법령 제·개정 확인표·모니터링', src:'경로: 00. 기획 / 07. EHS 법령 제개정' },
     '업무보고':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/08. 업무보고', reg:false, flow:PDCA, gov:'EHS 업무보고', desc:'EHS 업무보고 자료', src:'경로: 00. 기획 / 08. 업무보고' },
     '인원 채용':{ folder:'https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/09. 인원 채용', reg:false, flow:PDCA, gov:'EHS 인원 채용', desc:'EHS 인원 채용 관련 자료', src:'경로: 00. 기획 / 09. 인원 채용' },
@@ -2174,7 +2175,25 @@
     if(typeof curItem!=='undefined' && curItem===name && typeof openItem==='function'){ openItem(name); }
     if(window.toast) toast('저장: '+dispName(name));
   }
-  function stdFlowSeedFromProc(name){ var base=flowFromItem(name); if(!base.length) base=[['현황·대상 파악',''],['계획 수립',''],['실행·조치',''],['점검·개선',''],['기록·보고','']]; if(STD_FLOW_BUF.length && STD_FLOW_BUF.some(function(s){return s[0];})){ if(!confirm('현재 입력한 단계를 지우고 절차서 기반 초안으로 채울까요?')) return; } STD_FLOW_BUF=JSON.parse(JSON.stringify(base)); stdRender(); var el=document.getElementById('sf-t-0'); if(el) el.focus(); if(window.toast) toast('절차서 기반 초안을 불러왔습니다 — 수정 후 저장하세요'); }
+  // 지침서(절차서) 원문 대조로 작성한 flow 초안 라이브러리 — 항목이 여기 있으면 이 초안을 우선 사용(확장 가능)
+  var PROC_FLOW={
+    '예산':[['개선항목 발굴·의견취합','각 부서·제안제도'],['예산 편성·집행계획 수립','안전보건방침·추진계획 연동'],['편성계획 승인','경영책임자'],['예산 배정','항목별 기준·반기/분기'],['집행·모니터링','부서장 승인 후·안전관리자'],['실적 관리·차기년도 반영','효율성·투명성']]
+  };
+  function stdFlowSeedFromProc(name){
+    var codes=[]; try{ codes=(stdEffDocs(name,'')||[]).filter(function(c){return /I-EHS-\d+/.test(c);}); }catch(e){}
+    var fromLib=!!(PROC_FLOW[name]&&PROC_FLOW[name].length);
+    var base=fromLib?JSON.parse(JSON.stringify(PROC_FLOW[name])):flowFromItem(name);
+    var generic=false;
+    if(!base.length){ base=[['현황·대상 파악',''],['계획 수립',''],['실행·조치',''],['점검·개선',''],['기록·보고','']]; generic=true; }
+    if(STD_FLOW_BUF.length && STD_FLOW_BUF.some(function(s){return s[0];})){ if(!confirm('현재 입력한 단계를 지우고 절차서 기반 초안으로 채울까요?')) return; }
+    STD_FLOW_BUF=JSON.parse(JSON.stringify(base)); stdRender(); var el=document.getElementById('sf-t-0'); if(el) el.focus();
+    if(window.toast){
+      if(fromLib) toast((codes[0]||'절차서')+' 지침서 기반 초안을 불러왔습니다 — 수정 후 저장');
+      else if(generic && !codes.length) toast('지정 절차서(I-EHS)가 없어 기본 5단계 템플릿을 넣었습니다 — 직접 작성하세요');
+      else if(codes.length) toast(codes.join(',')+' 기준 현재 flow를 불러왔습니다 — 수정 후 저장');
+      else toast('기본 흐름 초안을 불러왔습니다 — 수정 후 저장');
+    }
+  }
   function stdReset(name){ var o=JSON.parse(JSON.stringify(stdOvAll())); if(o[name]){ var f=o[name].flow, fs=o[name].flowStatus; delete o[name]; if(f){ o[name]={flow:f, flowStatus:fs}; } } stdOvSave(o); STD_EDIT=null; stdRender(); if(window.toast) toast('초안으로 되돌림(법령·절차서·메모): '+name); }
   // ── 업무 Flow 편집 상태/조작 함수
   var STD_FLOW_EDIT=null, STD_FLOW_BUF=[], STD_P3_BUF={};
