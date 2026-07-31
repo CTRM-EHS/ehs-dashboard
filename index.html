@@ -561,6 +561,7 @@
 <script src="patrol_data.js"></script>
 <script src="gear_data.js"></script>
 <script src="std_data.js"></script>
+<script src="sg_data.js"></script>
 <script>
   // ===== 항목 데이터 (도메인/그룹별) =====
   const D={
@@ -1122,14 +1123,14 @@
     var MAN='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/매뉴얼/CTR _EHS 매뉴얼_Rev.1_2023.04.25 (모빌리티).docx';
     var DOCN={'I-EHS-01':'EHS 리스크 관리지침','I-EHS-02':'EHS 교육 운영 지침','I-EHS-03':'환경운영관리 지침','I-EHS-04':'안전보건 운영관리 지침','I-EHS-05':'EHS 비상사태 운영 지침','I-EHS-06':'EHS 준수평가 관리지침','I-EHS-07':'산업재해관리 지침','I-EHS-08':'내부심사 지침','I-EHS-09':'문서관리 지침','I-EHS-10':'시정 및 예방조치 지침','I-EHS-11':'기록분류 및 파일링 지침','I-EHS-12':'경영검토 지침'};
     function open2(url){ return "window.open('"+String(url).replace(/'/g,"%27")+"','_blank')"; }
-    function row(icon,label,sub,onclick){ return '<div onclick="'+onclick+'" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;cursor:pointer;background:#fff" onmouseover="this.style.background=\'#f5f8ff\'" onmouseout="this.style.background=\'#fff\'"><span style="font-size:15px">'+icon+'</span><div style="flex:1"><div style="font-weight:600;font-size:12.5px">'+esc(label)+'</div>'+(sub?'<div style="font-size:11px;color:var(--muted)">'+esc(sub)+'</div>':'')+'</div><span style="color:#2159c9;font-size:12px;white-space:nowrap">열기 ↗</span></div>'; }
+    function row(icon,label,sub,onclick,extra){ return '<div onclick="'+onclick+'" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;cursor:pointer;background:#fff" onmouseover="this.style.background=\'#f5f8ff\'" onmouseout="this.style.background=\'#fff\'"><span style="font-size:15px">'+icon+'</span><div style="flex:1"><div style="font-weight:600;font-size:12.5px">'+esc(label)+'</div>'+(sub?'<div style="font-size:11px;color:var(--muted)">'+esc(sub)+'</div>':'')+'</div>'+(extra||'')+'<span style="color:#2159c9;font-size:12px;white-space:nowrap">열기 ↗</span></div>'; }
     function head(t){ return '<div style="font-weight:700;font-size:12.5px;margin:16px 0 8px;color:var(--navy)">'+t+'</div>'; }
     var out='<div class="card"><h3>안전보건체계문서 <span class="tag">매뉴얼·프로세스·지침서·인증서 · 클릭 시 원본 바로 열림</span></h3>';
     out+='<div style="margin-top:6px"></div>'+head('경영매뉴얼 · 프로세스').replace('margin:16px','margin:2px');
     out+=row('📕','CTR EHS 경영매뉴얼 (Rev.1)','ISO 14001·45001 통합 경영매뉴얼', open2(MAN));
     out+=row('🗺️','P-EHS EHS 프로세스 (Rev.3)','EHS 업무 프로세스 정의', open2(PROC));
     out+=head('지침서 (I-EHS)');
-    Object.keys(DOCN).forEach(function(code){ out+=row('📄',code+'  '+DOCN[code],'', "openDoc('"+code+"')"); });
+    Object.keys(DOCN).forEach(function(code){ out+=row('📄',code+'  '+DOCN[code],'', "openDoc('"+code+"')", singuChip(code)); });
     out+=head('인증서 · ISO 문서함');
     ['인증서','ISO 14001','ISO 45001'].forEach(function(nm){ var s=itemData[nm]||{}; if(s.folder) out+=row('📁',nm,s.desc||'', open2(s.folder)); });
     out+='</div>';
@@ -1971,6 +1972,91 @@
   ];
   const DOC_LINKS={"I-EHS-01": "https://ctrcentral-my.sharepoint.com/personal/ctrfs05_ctr_co_kr/Documents/EHS팀/EHS(공통)/00. 기획(공통)/03. ISO/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-01(EHS 리스크 관리지침)-Rev.3.xlsx", "I-EHS-02": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-02(EHS 교육 운영 지침)-Rev.1.xlsx", "I-EHS-03": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-03(환경운영관리 지침)--Rev.6.xlsx", "I-EHS-04": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-04(안전보건 운영관리 지침)-Rev.2 - (모빌리티).xlsx", "I-EHS-05": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-05(EHS 비상사태 운영 지침)-Rev.3(모빌리티).xlsx", "I-EHS-06": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-06(EHS 준수평가 관리지침)-Rev.2(모빌리티).xlsx", "I-EHS-07": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-07(산업재해관리 지침)-Rev2(모빌리티).xlsx", "I-EHS-08": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-08(내부심사 지침)-Rev.4(모빌리티).xlsx", "I-EHS-09": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-09(문서관리 지침)-Rev.4(모빌리티).xlsx", "I-EHS-10": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-10(시정 및 예방조치 지침)-Rev.3(모빌리티).xlsx", "I-EHS-11": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-11(기록분류 및 파일링 지침)-Rev.2(모빌리티).xlsx", "I-EHS-12": "https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/지침서/● I-EHS-12(경영검토 지침)-Rev.3.xlsx"};
   function openDoc(code){ if(DOC_LINKS[code]){window.open(DOC_LINKS[code],'_blank');} else {toast(code+' 지침서 링크는 SharePoint 문서함 연동 시 활성화됩니다');} }
+
+  /* ===== 신구비교 (개정 전·후 대조) — 데이터: sg_data.js (신구비교/extract.py로 생성) ===== */
+  var _sgChgOnly=true;
+  function _sgEsc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function _sgLcs(a,b){var n=a.length,m=b.length,dp=[];for(var i=0;i<=n;i++)dp.push(new Int32Array(m+1));
+    for(var i=n-1;i>=0;i--)for(var j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+    var ops=[],i=0,j=0;while(i<n&&j<m){if(a[i]===b[j]){ops.push(['eq',a[i],b[j]]);i++;j++;}else if(dp[i+1][j]>=dp[i][j+1]){ops.push(['del',a[i],null]);i++;}else{ops.push(['ins',null,b[j]]);j++;}}
+    while(i<n){ops.push(['del',a[i],null]);i++;}while(j<m){ops.push(['ins',null,b[j]]);j++;}return ops;}
+  function _sgLcsLen(a,b){var n=a.length,m=b.length;if(!n||!m)return 0;var dp=new Int32Array(m+1);for(var i=1;i<=n;i++){var prev=0;for(var j=1;j<=m;j++){var tmp=dp[j];if(a[i-1]===b[j-1])dp[j]=prev+1;else dp[j]=Math.max(dp[j],dp[j-1]);prev=tmp;}}return dp[m];}
+  function _sgSim(a,b){if(a===b)return 1;if(!a.length||!b.length)return 0;return 2*_sgLcsLen(a,b)/(a.length+b.length);}
+  /* 구간(연속 삭제/추가) 유사도 기반 정렬 — 번호 밀림·오타는 '변경'으로 짝짓고, 진짜 새 내용은 '추가(신설)'로 분리 */
+  function _sgAlign(D,I){var n=D.length,m=I.length,x;
+    if(!n){var r=[];for(x=0;x<m;x++)r.push({t:'ins',n:I[x]});return r;}
+    if(!m){var r=[];for(x=0;x<n;x++)r.push({t:'del',o:D[x]});return r;}
+    if(n*m>2500){var r=[],k=Math.min(n,m);for(x=0;x<k;x++)r.push({t:'rep',o:D[x],n:I[x]});for(x=k;x<n;x++)r.push({t:'del',o:D[x]});for(x=k;x<m;x++)r.push({t:'ins',n:I[x]});return r;}
+    var TH=0.5,NEG=-1e9,i,j,S=[];for(i=0;i<n;i++){S.push([]);for(j=0;j<m;j++)S[i][j]=_sgSim(D[i],I[j]);}
+    var dp=[];for(i=0;i<=n;i++)dp.push(new Float64Array(m+1));
+    for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--){var mv=S[i][j]>=TH?dp[i+1][j+1]+S[i][j]:NEG;dp[i][j]=Math.max(mv,dp[i+1][j],dp[i][j+1]);}
+    var res=[];i=0;j=0;
+    while(i<n&&j<m){var mv=S[i][j]>=TH?dp[i+1][j+1]+S[i][j]:NEG;if(mv>=dp[i+1][j]&&mv>=dp[i][j+1]){res.push({t:'rep',o:D[i],n:I[j]});i++;j++;}else if(dp[i+1][j]>=dp[i][j+1]){res.push({t:'del',o:D[i]});i++;}else{res.push({t:'ins',n:I[j]});j++;}}
+    while(i<n){res.push({t:'del',o:D[i]});i++;}while(j<m){res.push({t:'ins',n:I[j]});j++;}return res;}
+  function _sgRows(ops){var rows=[],dq=[],iq=[];function fl(){if(dq.length||iq.length){var g=_sgAlign(dq,iq);for(var x=0;x<g.length;x++)rows.push(g[x]);}dq=[];iq=[];}
+    ops.forEach(function(op){if(op[0]==='eq'){fl();rows.push({t:'eq',o:op[1],n:op[2]});}else if(op[0]==='del')dq.push(op[1]);else iq.push(op[2]);});fl();return rows;}
+  function _sgInline(a,b){var n=a.length,m=b.length,dp=[];for(var i=0;i<=n;i++)dp.push(new Int32Array(m+1));
+    for(var i=n-1;i>=0;i--)for(var j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+    var i=0,j=0,oh='',nh='',od='',nd='';var DS='background:#ffe3e3;color:#c0392b;text-decoration:line-through',IS='background:#e0edff;color:#1a5fb4;text-decoration:underline';
+    function fd(){if(od){oh+='<span style="'+DS+'">'+_sgEsc(od)+'</span>';od='';}}function fi(){if(nd){nh+='<span style="'+IS+'">'+_sgEsc(nd)+'</span>';nd='';}}
+    while(i<n&&j<m){if(a[i]===b[j]){fd();fi();oh+=_sgEsc(a[i]);nh+=_sgEsc(b[j]);i++;j++;}else if(dp[i+1][j]>=dp[i][j+1]){od+=a[i];i++;}else{nd+=b[j];j++;}}
+    while(i<n){od+=a[i];i++;}while(j<m){nd+=b[j];j++;}fd();fi();return [oh,nh];}
+  function _sgFind(code){var d=window.SGB_DATA;if(!d||!d.sets)return null;for(var i=0;i<d.sets.length;i++)if(d.sets[i].id===code)return d.sets[i];return null;}
+  function _sgStatus(sec){if(sec.same)return 'same';if(!sec.old.length)return 'new';if(!sec.new.length)return 'rem';var r=_sgRows(_sgLcs(sec.old,sec.new));for(var i=0;i<r.length;i++)if(r[i].t!=='eq')return 'chg';return 'same';}
+  function singuChip(code){var s=_sgFind(code);
+    if(!s)return '<span style="font-size:11px;color:#9aa4b2;white-space:nowrap;margin-right:6px">이전 개정본 없음</span>';
+    var tip=(s.oldLabel||'구')+' → '+(s.newLabel||'신');
+    if(s.changed>0){
+      return '<span onclick="event.stopPropagation();openSingu(\''+code+'\')" title="'+tip+'" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;background:#fff3dc;color:#b9770f;cursor:pointer;white-space:nowrap;margin-right:6px" onmouseover="this.style.background=\'#ffe9bf\'" onmouseout="this.style.background=\'#fff3dc\'">🔍 신구비교 · 변경 '+s.changed+'</span>';}
+    return '<span onclick="event.stopPropagation();openSingu(\''+code+'\')" title="'+tip+' · 변경 없음" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;background:#eef1f5;color:#8a94a3;cursor:pointer;white-space:nowrap;margin-right:6px" onmouseover="this.style.background=\'#e3e7ee\'" onmouseout="this.style.background=\'#eef1f5\'">🔍 신구동일</span>';}
+  function openSingu(code){var s=_sgFind(code);if(!s){toast('이전 개정본이 없습니다');return;}_sgRenderModal(s);}
+  function _sgToggle(){_sgChgOnly=!_sgChgOnly;var m=document.getElementById('sg-ov');if(m&&m._set)_sgRenderModal(m._set);}
+  function _sgClose(){var m=document.getElementById('sg-ov');if(m)m.style.display='none';}
+  function _sgRenderModal(set){
+    var GUT='color:#b8c0cc;text-align:right;font-size:10.5px;background:#fafbfd;border-right:1px solid #e2e6ee;padding:4px 8px;vertical-align:top';
+    var OLD='padding:4px 10px;font-size:12px;white-space:pre-wrap;word-break:break-word;border-right:2px solid #e2e6ee;border-bottom:1px solid #eef1f6;vertical-align:top';
+    var NEW='padding:4px 10px;font-size:12px;white-space:pre-wrap;word-break:break-word;border-bottom:1px solid #eef1f6;vertical-align:top';
+    var TH='background:#f0f3f8;color:#6b7686;font-size:11px;font-weight:700;padding:5px 10px;text-align:left;border-bottom:1px solid #e2e6ee';
+    var BTN='padding:6px 12px;border:1px solid #e2e6ee;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#1f2733';
+    var EMP='background:repeating-linear-gradient(45deg,#fafbfd,#fafbfd 6px,#f1f3f7 6px,#f1f3f7 12px)';
+    var BADGE={same:'동일',chg:'변경','new':'신설',rem:'삭제'};
+    var BG={same:'#eef1f5;color:#8a94a3',chg:'#fff3dc;color:#b9770f','new':'#e0edff;color:#1a5fb4',rem:'#ffe3e3;color:#c0392b'};
+    var cnt={same:0,chg:0,'new':0,rem:0};
+    set.sections.forEach(function(s){s._st=_sgStatus(s);cnt[s._st]++;});
+    var body='';
+    set.sections.forEach(function(sec){
+      if(_sgChgOnly && sec._st==='same')return;
+      var _oa=sec.same?sec.new:sec.old; var rows=_sgRows(_sgLcs(_oa,sec.new)),lo=0,ln=0,tr='',shown=0;
+      rows.forEach(function(r){
+        if(_sgChgOnly && r.t==='eq')return;
+        if(r.t==='eq'){lo++;ln++;tr+='<tr><td style="'+GUT+'">'+lo+'</td><td style="'+OLD+'">'+_sgEsc(r.o)+'</td><td style="'+GUT+'">'+ln+'</td><td style="'+NEW+'">'+_sgEsc(r.n)+'</td></tr>';}
+        else if(r.t==='del'){lo++;tr+='<tr><td style="'+GUT+'">'+lo+'</td><td style="'+OLD+';background:#fff5f5"><span style="background:#ffe3e3;color:#c0392b;text-decoration:line-through">'+_sgEsc(r.o)+'</span></td><td style="'+GUT+'"></td><td style="'+NEW+';'+EMP+'"></td></tr>';}
+        else if(r.t==='ins'){ln++;tr+='<tr><td style="'+GUT+'"></td><td style="'+OLD+';'+EMP+'"></td><td style="'+GUT+'">'+ln+'</td><td style="'+NEW+';background:#f3f8ff"><span style="background:#e0edff;color:#1a5fb4;text-decoration:underline">'+_sgEsc(r.n)+'</span></td></tr>';}
+        else{lo++;ln++;var p=_sgInline(r.o,r.n);tr+='<tr><td style="'+GUT+'">'+lo+'</td><td style="'+OLD+';background:#fff5f5">'+p[0]+'</td><td style="'+GUT+'">'+ln+'</td><td style="'+NEW+';background:#f3f8ff">'+p[1]+'</td></tr>';}
+        shown++;
+      });
+      if(_sgChgOnly && shown===0)return;
+      body+='<div style="border:1px solid #e2e6ee;border-radius:9px;margin-bottom:10px;overflow:hidden">'
+        +'<div style="display:flex;align-items:center;gap:9px;padding:8px 12px;background:#fbfcfe;border-bottom:1px solid #eef1f6"><b style="font-size:13px">'+_sgEsc(sec.title)+'</b>'
+        +'<span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+BG[sec._st]+'">'+BADGE[sec._st]+'</span></div>'
+        +'<table style="width:100%;border-collapse:collapse;table-layout:fixed"><colgroup><col style="width:34px"><col><col style="width:34px"><col></colgroup>'
+        +'<tr><th style="'+TH+'"></th><th style="'+TH+'">구(舊) · '+_sgEsc(set.oldLabel)+'</th><th style="'+TH+'"></th><th style="'+TH+'">신(新) · '+_sgEsc(set.newLabel)+'</th></tr>'+tr+'</table></div>';
+    });
+    if(!body)body='<div style="padding:30px;text-align:center;color:#788699">변경된 내용이 없습니다.</div>';
+    var head='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
+      +'<h3 style="margin:0;font-size:15px">🔍 '+_sgEsc(set.title)+' <span style="font-size:12px;color:#788699;font-weight:400">신구비교</span></h3>'
+      +'<span style="font-size:11px;color:#788699">'+_sgEsc(set.oldLabel)+' → '+_sgEsc(set.newLabel)+'</span>'
+      +'<span style="margin-left:auto;font-size:11.5px;color:#788699">변경 '+cnt.chg+' · 신설 '+cnt['new']+' · 삭제 '+cnt.rem+' · 동일 '+cnt.same+'</span>'
+      +'<button onclick="_sgToggle()" style="'+BTN+'">'+(_sgChgOnly?'전체 보기':'변경만 보기')+'</button>'
+      +'<button onclick="openDoc(\''+set.id+'\')" style="'+BTN+'">원본 열기 ↗</button>'
+      +'<button onclick="_sgClose()" style="'+BTN+'">닫기 ✕</button></div>'
+      +'<div style="font-size:11px;color:#788699;margin-bottom:10px"><span style="background:#ffe3e3;color:#c0392b;text-decoration:line-through;padding:0 4px;border-radius:2px">삭제</span> 구(舊)측 · <span style="background:#e0edff;color:#1a5fb4;text-decoration:underline;padding:0 4px;border-radius:2px">추가</span> 신(新)측</div>';
+    var m=document.getElementById('sg-ov');
+    if(!m){m=document.createElement('div');m.id='sg-ov';m.style.cssText='position:fixed;inset:0;background:rgba(20,25,40,.5);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px';m.addEventListener('click',function(e){if(e.target===m)_sgClose();});document.body.appendChild(m);}
+    m._set=set;
+    m.innerHTML='<div style="background:#fff;border-radius:12px;max-width:1200px;width:100%;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.35)">'+head+body+'</div>';
+    m.style.display='flex';
+  }
 
   // ===== 국가법령정보센터 최신 원문 연동 =====
   // 표시 법령명 → 국가법령정보센터 공식 법령명(URL/API용) 매핑

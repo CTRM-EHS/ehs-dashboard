@@ -14,8 +14,8 @@ if errorlevel 1 (
 )
 echo.
 echo [2/3] 변경사항 저장(커밋)...
-git add patrol_data.js
-git commit -m "순찰 CSV 반영 %date%" >nul 2>&1
+git add patrol_data.js index.html sg_data.js
+git commit -m "대시보드 업데이트(순찰/신구비교) %date%" >nul 2>&1
 if errorlevel 1 echo   (변경 없음 - 새로 올릴 내용 없음)
 echo.
 echo [3/3] GitHub에 업로드...
