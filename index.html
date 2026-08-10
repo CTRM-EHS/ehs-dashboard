@@ -164,8 +164,8 @@
   .colgrip{position:absolute;right:-3px;top:0;height:100%;width:7px;cursor:col-resize;z-index:3}
   .colgrip:hover{background:rgba(33,89,201,.3)}
   /* 법령 팝업 모달 */
-  #lawmodal,#recmodal,#docmodal,#fitmodal{position:fixed;inset:0;background:rgba(20,28,40,.45);display:none;align-items:center;justify-content:center;z-index:200}
-  #lawmodal.show,#recmodal.show,#docmodal.show,#fitmodal.show{display:flex}
+  #lawmodal,#recmodal,#docmodal{position:fixed;inset:0;background:rgba(20,28,40,.45);display:none;align-items:center;justify-content:center;z-index:200}
+  #lawmodal.show,#recmodal.show,#docmodal.show{display:flex}
   .rmtbl{width:100%;border-collapse:collapse}
   .rmtbl th,.rmtbl td{padding:7px 9px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:left;vertical-align:top}
   .lm-box{background:#fff;width:min(560px,92vw);max-height:82vh;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden}
@@ -545,11 +545,6 @@
   <div class="lm-head"><b>§ 관련 법령</b><button class="lm-x" onclick="closeLawModal()">×</button></div>
   <div class="lm-body" id="lm-body"></div>
   <div class="lm-foot"><span style="font-size:11px;color:var(--muted)">요약 조문 · <b>최신 원문 ↗</b>은 국가법령정보센터 현행 법령(새창)</span><a onclick="closeLawModal();go('law')">전체 관련법령 조회 ›</a></div>
-</div></div>
-<div id="fitmodal"><div class="lm-box">
-  <div class="lm-head"><b>⚖ 법규 정합성</b><button class="lm-x" onclick="closeFitModal()">×</button></div>
-  <div class="lm-body" id="fit-body"></div>
-  <div class="lm-foot"><span style="font-size:11px;color:var(--muted)">현행 법령 대비 지침서 반영 상태 · 시행일은 국가법령정보 OPEN API 기준</span><a onclick="closeFitModal();go('law')">관련법령 조회 ›</a></div>
 </div></div>
 <div id="docmodal"><div class="lm-box">
   <div class="lm-head"><b>📄 지침서 원문</b><button class="lm-x" onclick="closeDocModal()">×</button></div>
@@ -1705,7 +1700,7 @@
     const codes=(egov+' '+edocs).match(/I-EHS-\d+/g);
     if(codes){ const c=codes[0];
       govChip='<span onclick="showDocModal(\''+c+'\',\''+gv+'\',\''+nm+'\')" style="cursor:pointer" title="지침서 원문 팝업">'+govChip+'</span>'; }
-    document.getElementById('d-meta').innerHTML = cycChip + govChip + lawChip + fitBadge(name) + p3Chip;
+    document.getElementById('d-meta').innerHTML = cycChip + govChip + lawChip + p3Chip;
     if(name==='연간안전보건계획'||name==='안전보건체계문서'){
       ['d-flowcard','d-tabbar','d-tabcard','d-site'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
       const c=document.getElementById('d-custom'); c.style.display='';
@@ -2443,7 +2438,7 @@
                               : ' <button class="btn sm" onclick="stdToggleConfirm(\''+nq+'\')" title="확정 — 안전·보건·환경·기획 화면에 노출">✔ 확정</button>')
                      + (_cust ? ' <button class="btn ghost sm" onclick="stdDelItem(\''+nq+'\',\''+g+'\')" title="추가한 항목 삭제">✕</button>' : '')
                      + ' '+attachCellHTML(name);
-            itemRows+='<tr><td class="tag">'+glabel+'</td><td><b>'+esc(dispName(name))+'</b>'+(_cust?' <span class="tag" style="font-size:9px;color:#2159c9">추가</span>':'')+stdChkBadge(name)+fitBadge(name)+'</td><td>'+stdLawHTML(law)+'</td><td>'+stdDocChips(docs)+'</td>'
+            itemRows+='<tr><td class="tag">'+glabel+'</td><td><b>'+esc(dispName(name))+'</b>'+(_cust?' <span class="tag" style="font-size:9px;color:#2159c9">추가</span>':'')+stdChkBadge(name)+'</td><td>'+stdLawHTML(law)+'</td><td>'+stdDocChips(docs)+'</td>'
               +'<td class="tag" style="font-size:11px;color:var(--muted)">'+esc(memo||'—')+'</td><td style="text-align:center;white-space:nowrap">'+stat+'</td><td style="white-space:nowrap">'+mgmt+'</td></tr>';
           }
         });
@@ -2473,43 +2468,6 @@
       +'<button onclick="stdSetTab(\'flow\')" style="'+(STD_TAB==='flow'?_tA:_tI)+'">🧭 업무 Flow</button></div>';
     host.innerHTML=tabbar+tb+(out||'<p class="tag">검색 결과 없음</p>');
   }
-
-  // ===== 법규 정합성(현행 법령 vs 지침서) — badge + 상세 모달 =====
-  // 국가법령정보 OPEN API(OC=eotjs0814)로 확인한 현행 시행일 기준. 항목별로 계속 추가 예정.
-  window.LAWFIT = window.LAWFIT || {
-    '체감온도 관리': {
-      law:'산업안전보건법 · 산업안전보건기준에 관한 규칙',
-      art:'산안법 제5·39조(보건조치) · 기준규칙(온열질환 예방)',
-      req:'체감온도 33℃ 이상 시 2시간마다 20분 이상 휴식 부여(법적 의무), 35℃ 이상 14~17시 옥외작업 중지 권고, 38℃ 이상 옥외작업 중지. 그늘·물·휴식 제공 및 폭염 위험성평가·작업중지 절차 문서화.',
-      cur:'현행 「체감온도 관리」 항목은 있으나 33/38℃ 정량 기준과 휴식 부여·작업중지 절차가 미반영.',
-      judge:'보완필요',
-      eff:'안전보건규칙 현행 2026.03.02 · 산업안전보건법 현행 2026.08.01',
-      src:'고용노동부 2026 폭염 대책(2026.5.13) · 대책기간 5.15~9.30 · 국가법령정보 OPEN API 조회 2026-08-10',
-      lawkey:'산업안전보건기준에 관한 규칙'
-    }
-  };
-  var FIT_COL={'일치':['#e4f4e8','#1f8a4c'],'보완필요':['#fcefc7','#8a6d1f'],'누락':['#fbe0e0','#a32d2d'],'확인필요':['#ececec','#555']};
-  function fitBadge(name){
-    var f=(window.LAWFIT||{})[name]; if(!f) return '';
-    var c=FIT_COL[f.judge]||['#eef2f7','#333']; var nq=String(name).replace(/'/g,"\\'");
-    return ' <span class="pill" style="cursor:pointer;background:'+c[0]+';color:'+c[1]+'" onclick="showFitModal(\''+nq+'\')" title="법규 정합성 상세 보기">⚖ 법규 '+esc(f.judge)+' ›</span>';
-  }
-  function showFitModal(name){
-    var f=(window.LAWFIT||{})[name]; if(!f) return;
-    var c=FIT_COL[f.judge]||['#eef2f7','#333'];
-    var jsq=function(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
-    var row=function(k,v){return '<div class="lm-law"><div style="font-size:11px;color:var(--muted);margin-bottom:3px">'+k+'</div><div style="font-size:12.5px;line-height:1.55">'+v+'</div></div>';};
-    document.getElementById('fit-body').innerHTML=
-      '<div style="margin-bottom:10px"><b style="font-size:14px">'+esc(name)+'</b> <span class="pill" style="background:'+c[0]+';color:'+c[1]+'">판정: '+esc(f.judge)+'</span></div>'
-      +row('관련 법령 · 조항', esc(f.law)+'<br><span style="color:#555">'+esc(f.art)+'</span>')
-      +row('현행 법 요구사항', esc(f.req))
-      +row('지침서 현재 반영', esc(f.cur))
-      +row('현행 시행일 (국가법령정보 OPEN API)', esc(f.eff))
-      +row('근거 · 출처', esc(f.src))
-      +'<div style="margin-top:10px"><button class="btn ghost sm" onclick="openLawSource(\''+jsq(f.lawkey||f.law)+'\')">국가법령정보센터 원문 ↗</button></div>';
-    document.getElementById('fitmodal').classList.add('show');
-  }
-  function closeFitModal(){ document.getElementById('fitmodal').classList.remove('show'); }
 
   function showLawModal(gov,name){
     gov=gov||''; const ctx=gov+' '+(name||'');
