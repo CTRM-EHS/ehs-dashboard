@@ -1121,18 +1121,18 @@
   }
   /* 지침서 목록 칸 너비 — 드래그 조절(localStorage 저장) */
   var DOC_COLW=null;
-  var DOC_COLW_DEF=[104,430,132,142];
-  function docColW(){ if(DOC_COLW)return DOC_COLW; try{DOC_COLW=JSON.parse(localStorage.getItem('ehs_doc_colw'));}catch(e){} if(!DOC_COLW||DOC_COLW.length!==4)DOC_COLW=DOC_COLW_DEF.slice(); return DOC_COLW; }
+  var DOC_COLW_DEF=[104,252,310,142];
+  function docColW(){ if(DOC_COLW)return DOC_COLW; try{DOC_COLW=JSON.parse(localStorage.getItem('ehs_doc_colw2'));}catch(e){} if(!DOC_COLW||DOC_COLW.length!==4)DOC_COLW=DOC_COLW_DEF.slice(); return DOC_COLW; }
   function docColStart(e,i){
     e.preventDefault(); e.stopPropagation();
     var sx=e.clientX, w=docColW()[i];
     document.body.style.userSelect='none'; document.body.style.cursor='col-resize';
     function mv(ev){ ev.preventDefault(); var nw=Math.max(60,w+(ev.clientX-sx)); DOC_COLW[i]=nw;
       ['doc-tbl','doc-tbl0'].forEach(function(id){var t=document.getElementById(id); if(t){var cols=t.getElementsByTagName('col'); if(cols[i])cols[i].style.width=nw+'px';}}); }
-    function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); document.body.style.userSelect=''; document.body.style.cursor=''; try{localStorage.setItem('ehs_doc_colw',JSON.stringify(DOC_COLW));}catch(e){} }
+    function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); document.body.style.userSelect=''; document.body.style.cursor=''; try{localStorage.setItem('ehs_doc_colw2',JSON.stringify(DOC_COLW));}catch(e){} }
     document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
   }
-  function docColReset(){ DOC_COLW=DOC_COLW_DEF.slice(); try{localStorage.setItem('ehs_doc_colw',JSON.stringify(DOC_COLW));}catch(e){} var c=document.getElementById('d-custom'); if(c)c.innerHTML=subFoldersHTML(); }
+  function docColReset(){ DOC_COLW=DOC_COLW_DEF.slice(); try{localStorage.setItem('ehs_doc_colw2',JSON.stringify(DOC_COLW));}catch(e){} var c=document.getElementById('d-custom'); if(c)c.innerHTML=subFoldersHTML(); }
   function subFoldersHTML(){
     var PROC='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/프로세스/■ P-EHS(EHS 프로세스)-Rev.3.xlsx';
     var MAN='https://ctrcentral.sharepoint.com/sites/93/Shared Documents/CTR M EHS팀/00. 기획/03. ISO 프로세스/03. 매뉴얼 프로세스 지침서/매뉴얼/CTR _EHS 매뉴얼_Rev.1_2023.04.25 (모빌리티).docx';
@@ -2121,8 +2121,10 @@
     var s=_lfFind(code), na=lawfitNA(code);
     if(!s&&na)return '<span title="'+_lfAttr(na)+'" style="display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;background:#f3f5f9;color:#a7b0bd;white-space:nowrap">⚖ 해당없음</span>';
     if(!s)return '<span style="display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;background:#eef1f5;color:#9aa4b2;white-space:nowrap" title="법규정합성 미검증">⚖ 미검증</span>';
-    var a=_lfAct(s), bg=a?'#fde7e5':'#e4f7ec', fg=a?'#c0271d':'#0f8a45', tx=a?('⚖ 조치 '+a):'⚖ 일치';
-    return '<span onclick="event.stopPropagation();openLawfit(\''+code+'\')" title="현행 법령 대조 · '+(window.LAWFIT_DATA.stamp||'')+' 검증" style="display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+bg+';color:'+fg+';cursor:pointer;white-space:nowrap">'+tx+'</span>';
+    var c=_lfCount(s), tip='현행 법령 대조 · '+(window.LAWFIT_DATA.stamp||'')+' 검증 · '+s.rows.length+'행';
+    var chips=_LFOPTS.filter(function(k){return c[k];}).map(function(k){var v=_LFV[k];
+      return '<span style="padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;background:'+v[0]+';color:'+v[1]+';white-space:nowrap">'+v[2]+' '+c[k]+'</span>';}).join('');
+    return '<span onclick="event.stopPropagation();openLawfit(\''+code+'\')" title="'+_lfAttr(tip)+'" style="display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;cursor:pointer">'+chips+'</span>';
   }
   function lawfitCellClick(code){
     var s=_lfFind(code), na=lawfitNA(code);
