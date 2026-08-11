@@ -1131,7 +1131,15 @@
     out+=row('📕','CTR EHS 경영매뉴얼 (Rev.1)','ISO 14001·45001 통합 경영매뉴얼', open2(MAN));
     out+=row('🗺️','P-EHS EHS 프로세스 (Rev.3)','EHS 업무 프로세스 정의', open2(PROC));
     out+=head('지침서 (I-EHS)');
-    Object.keys(DOCN).forEach(function(code){ out+=row('📄',code+'  '+DOCN[code],'', "openDoc('"+code+"')", lawfitChip(code)+singuChip(code)); });
+    var GC='grid-template-columns:104px 1fr 136px 136px 62px';
+    out+='<div style="border:1px solid var(--line);border-radius:9px;overflow:hidden">';
+    out+='<div style="display:grid;'+GC+';align-items:center;column-gap:12px;padding:8px 12px;background:#f7f9fc;border-bottom:1px solid #dfe5ed;font-size:10.5px;color:var(--muted);text-align:left"><div>문서번호</div><div>문서명</div><div>법규정합성</div><div>개정 신구비교</div><div>원본</div></div>';
+    Object.keys(DOCN).forEach(function(code){
+      out+='<div onclick="openDoc(\''+code+'\')" style="display:grid;'+GC+';align-items:center;column-gap:12px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer;background:#fff;font-size:12.5px;text-align:left" onmouseover="this.style.background=\'#f6f9ff\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div><b>'+code+'</b></div><div>'+DOCN[code]+'</div><div>'+lawfitChip(code)+'</div><div>'+singuChip(code)+'</div>'
+        +'<div style="color:#2159c9;font-size:11.5px">열기 ↗</div></div>';
+    });
+    out+='</div>';
     out+=head('인증서 · ISO 문서함');
     ['인증서','ISO 14001','ISO 45001'].forEach(function(nm){ var s=itemData[nm]||{}; if(s.folder) out+=row('📁',nm,s.desc||'', open2(s.folder)); });
     out+='</div>';
@@ -2061,22 +2069,58 @@
 
 
   /* ===== 법규정합성 (현행 법령 ↔ 지침서) — 데이터: law_data.js (국가법령정보 OPEN API 스냅샷) ===== */
-  var _lfActOnly=false, _lfSel='';
+  var _lfActOnly=false, _lfSel='', _lfCurOpen=false, _lfOv={};
+  try{ _lfOv=JSON.parse(localStorage.getItem('ehs_lawfit_ov')||'{}'); }catch(e){ _lfOv={}; }
+  try{ _lfCurOpen=(localStorage.getItem('ehs_lawfit_curopen')==='1'); }catch(e){}
   function _lfEsc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function _lfAttr(s){return String(s==null?'':s).replace(/"/g,'&quot;').replace(/</g,'&lt;');}
   function _lfFind(code){var d=window.LAWFIT_DATA;if(!d||!d.sets)return null;for(var i=0;i<d.sets.length;i++)if(d.sets[i].id===code)return d.sets[i];return null;}
-  var _LFV={'일치':['#e4f7ec','#0f8a45','일치'],'보완필요':['#fef3dd','#b9770a','보완필요'],'확인필요':['#e6effd','#2159c9','확인필요'],'누락(법령기준)':['#fde7e5','#c0271d','누락']};
-  function _lfCount(set){var c={};set.rows.forEach(function(r){c[r.verdict]=(c[r.verdict]||0)+1;});return c;}
+  var _LFV={'일치':['#e4f7ec','#0f8a45','일치'],'보완필요':['#fef3dd','#b9770a','보완필요'],'확인필요':['#e6effd','#2159c9','확인필요'],'누락(법령기준)':['#fde7e5','#c0271d','누락'],'해당없음':['#eef1f5','#8a94a3','해당없음']};
+  var _LFOPTS=['일치','보완필요','확인필요','누락(법령기준)','해당없음'];
+  function _lfKey(id,no){return id+'#'+no;}
+  function _lfOvGet(id,no){return _lfOv[_lfKey(id,no)]||null;}
+  function _lfSave(){try{localStorage.setItem('ehs_lawfit_ov',JSON.stringify(_lfOv));}catch(e){}}
+  function _lfV(set,r){var o=_lfOvGet(set.id,r.no);return (o&&o.verdict)?o.verdict:r.verdict;}
+  function _lfN(set,r){var o=_lfOvGet(set.id,r.no);return (o&&typeof o.note==='string')?o.note:(r.note||'');}
+  function _lfEdited(set,r){var o=_lfOvGet(set.id,r.no);return !!o;}
+  function _lfCount(set){var c={};set.rows.forEach(function(r){var v=_lfV(set,r);c[v]=(c[v]||0)+1;});return c;}
   function _lfAct(set){var c=_lfCount(set);return (c['보완필요']||0)+(c['확인필요']||0)+(c['누락(법령기준)']||0);}
   function lawfitChip(code){
     var s=_lfFind(code);
-    if(!s)return '<span style="display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;background:#eef1f5;color:#9aa4b2;white-space:nowrap;margin-right:6px" title="법규정합성 미검증">⚖ 미검증</span>';
-    var a=_lfAct(s), bg=a?'#fde7e5':'#e4f7ec', fg=a?'#c0271d':'#0f8a45', tx=a?('⚖ 정합성 · 조치 '+a):'⚖ 정합성 · 일치';
-    return '<span onclick="event.stopPropagation();openLawfit(\''+code+'\')" title="현행 법령 대조 · '+(window.LAWFIT_DATA.stamp||'')+' 검증" style="display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+bg+';color:'+fg+';cursor:pointer;white-space:nowrap;margin-right:6px">'+tx+'</span>';
+    if(!s)return '<span style="display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;background:#eef1f5;color:#9aa4b2;white-space:nowrap" title="법규정합성 미검증">⚖ 미검증</span>';
+    var a=_lfAct(s), bg=a?'#fde7e5':'#e4f7ec', fg=a?'#c0271d':'#0f8a45', tx=a?('⚖ 조치 '+a):'⚖ 일치';
+    return '<span onclick="event.stopPropagation();openLawfit(\''+code+'\')" title="현행 법령 대조 · '+(window.LAWFIT_DATA.stamp||'')+' 검증" style="display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+bg+';color:'+fg+';cursor:pointer;white-space:nowrap">'+tx+'</span>';
   }
   function openLawfit(code){var s=_lfFind(code);if(!s){toast('법규정합성 데이터가 없습니다');return;}_lfSel='';_lfRender(s);}
-  function _lfClose(){var m=document.getElementById('lf-ov');if(m)m.style.display='none';}
+  function _lfClose(){var m=document.getElementById('lf-ov');if(m)m.style.display='none';_lfRefreshList();}
+  function _lfRefreshList(){ try{ if(typeof curItem!=='undefined' && curItem==='안전보건체계문서'){ var c=document.getElementById('d-custom'); if(c) c.innerHTML=subFoldersHTML(); } }catch(e){} }
   function _lfSetF(v){_lfActOnly=v;var m=document.getElementById('lf-ov');if(m&&m._set)_lfRender(m._set);}
   function _lfPick(s){_lfSel=(_lfSel===s?'':s);var m=document.getElementById('lf-ov');if(m&&m._set)_lfRender(m._set);}
+  function _lfToggleCur(){_lfCurOpen=!_lfCurOpen;try{localStorage.setItem('ehs_lawfit_curopen',_lfCurOpen?'1':'0');}catch(e){}var m=document.getElementById('lf-ov');if(m&&m._set)_lfRender(m._set);}
+  function _lfSetVerdict(id,no,v){
+    var set=_lfFind(id); if(!set)return; var base=null; set.rows.forEach(function(r){if(String(r.no)===String(no))base=r;}); if(!base)return;
+    var k=_lfKey(id,no), o=_lfOv[k]||{};
+    if(v===base.verdict && (!('note' in o))) { delete _lfOv[k]; } else { o.verdict=v; _lfOv[k]=o; }
+    _lfSave(); _lfRender(set); if(window.toast)toast('판정 저장 — 내보내기로 공유하세요');
+  }
+  function _lfSetNote(id,no,txt){
+    var set=_lfFind(id); if(!set)return; var base=null; set.rows.forEach(function(r){if(String(r.no)===String(no))base=r;}); if(!base)return;
+    var k=_lfKey(id,no), o=_lfOv[k]||{};
+    if(txt===(base.note||'') && !o.verdict){ delete _lfOv[k]; } else { o.note=txt; _lfOv[k]=o; }
+    _lfSave();
+  }
+  function _lfReset(id){ if(!confirm('내가 수정한 판정·조치를 모두 초기화할까요?'))return; Object.keys(_lfOv).forEach(function(k){ if(k.indexOf(id+'#')===0) delete _lfOv[k]; }); _lfSave(); var s=_lfFind(id); if(s)_lfRender(s); }
+  function _lfExport(){
+    var D=window.LAWFIT_DATA; if(!D)return;
+    var out={stamp:D.stamp,oc:D.oc,currency:D.currency,sheets:D.sheets,sets:D.sets.map(function(s){
+      return {id:s.id,title:s.title,rev:s.rev,rows:s.rows.map(function(r){
+        var n={}; for(var k in r) n[k]=r[k]; n.verdict=_lfV(s,r); n.note=_lfN(s,r); if(_lfEdited(s,r)) n.by='사용자 확정'; return n;})};})};
+    var js='window.LAWFIT_DATA = '+JSON.stringify(out)+';\n';
+    var b=new Blob([js],{type:'text/javascript'}),u=URL.createObjectURL(b);
+    var a=document.createElement('a'); a.href=u; a.download='law_data.js'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(u);},1500);
+    if(window.toast)toast('law_data.js 저장 — 담당(Claude)에게 전달하면 전체 반영');
+  }
   function _lfRender(set){
     var D=window.LAWFIT_DATA, c=_lfCount(set), act=_lfAct(set);
     var TH='background:#f7f9fc;color:#788699;font-size:10.5px;font-weight:700;text-align:left;padding:7px 10px;border-bottom:1px solid #dfe5ed;border-right:1px solid #eaeef4;position:sticky;top:0;z-index:2';
@@ -2084,15 +2128,23 @@
     var BTN='padding:5px 11px;border:1px solid #dfe5ed;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#243244';
     var BTNON='padding:5px 11px;border:1px solid #22415f;border-radius:7px;background:#22415f;cursor:pointer;font-size:12px;color:#fff';
     var order={};(D.sheets||[]).forEach(function(s,i){order[s]=i;});
-    var rows=set.rows.filter(function(r){return (!_lfActOnly||r.verdict!=='일치') && (!_lfSel||r.sheet===_lfSel);});
+    var rows=set.rows.filter(function(r){return (!_lfActOnly||_lfV(set,r)!=='일치') && (!_lfSel||r.sheet===_lfSel);});
     rows=rows.slice().sort(function(a,b){var x=(order[a.sheet]==null?99:order[a.sheet]),y=(order[b.sheet]==null?99:order[b.sheet]);return x-y||a.no-b.no;});
     var body='',cur='';
     rows.forEach(function(r){
       if(r.sheet!==cur){cur=r.sheet;body+='<tr><td colspan="8" style="background:#eef3fb;color:#22415f;font-weight:700;font-size:11.5px;padding:5px 10px;border-bottom:1px solid #eaeef4">'+_lfEsc(cur)+'</td></tr>';}
-      var v=_LFV[r.verdict]||['#eef1f5','#8a94a3',r.verdict];
+      var vv=_lfV(set,r), v=_LFV[vv]||['#eef1f5','#8a94a3',vv], ed=_lfEdited(set,r);
       var lawLink=r.law?'<a href="https://www.law.go.kr/법령/'+encodeURIComponent(officialLawName(r.law))+'" target="_blank" rel="noopener" style="color:#2159c9;text-decoration:none;display:block">'+_lfEsc(r.law)+' ↗</a>':'';
-      var joLink=r.jo6?'<a href="https://www.law.go.kr/DRF/lawService.do?OC='+(D.oc||'')+'&target=law&type=HTML&MST='+r.mst+'&JO='+r.jo6+'" target="_blank" rel="noopener" style="color:#2159c9;text-decoration:none;display:block">'+_lfEsc(r.jo)+' ↗</a>':'<span style="color:#788699">'+_lfEsc(r.jo)+'</span>';
+      var LNK='color:#2159c9;text-decoration:none;display:block;margin-top:2px';
+      var joLink='';
+      if(r.jos&&r.jos.length){ joLink=r.jos.map(function(j){ return '<a href="https://www.law.go.kr/DRF/lawService.do?OC='+(D.oc||'')+'&target=law&type=HTML&MST='+j.mst+'&JO='+j.jo+'" target="_blank" rel="noopener" style="'+LNK+'" title="조문 원문 새 창">'+_lfEsc(j.t)+' ↗</a>'; }).join(''); }
+      else if(r.jo6){ joLink='<a href="https://www.law.go.kr/DRF/lawService.do?OC='+(D.oc||'')+'&target=law&type=HTML&MST='+r.mst+'&JO='+r.jo6+'" target="_blank" rel="noopener" style="'+LNK+'">'+_lfEsc(r.jo)+' ↗</a>'; }
+      else { joLink='<span style="color:#788699">'+_lfEsc(r.jo)+'</span>'; }
       var full=r.full?'<div style="margin-top:5px;padding:6px 8px;background:#fbfdff;border-left:2px solid #cfe0ff;color:#41506a;font-size:11px">'+_lfEsc(r.full)+'</div>':'';
+      var sel='<select onchange="_lfSetVerdict(\''+set.id+'\',\''+r.no+'\',this.value)" style="width:100%;font-size:11px;font-weight:700;border:1px solid #dfe5ed;border-radius:20px;padding:3px 6px;background:'+v[0]+';color:'+v[1]+';cursor:pointer">'
+        +_LFOPTS.map(function(o){return '<option value="'+o+'"'+(o===vv?' selected':'')+'>'+(_LFV[o]?_LFV[o][2]:o)+'</option>';}).join('')+'</select>'
+        +(ed?'<span style="display:block;font-size:10px;color:#2159c9;margin-top:3px">✎ 내 판정</span>':'');
+      var note='<div contenteditable="true" onblur="_lfSetNote(\''+set.id+'\',\''+r.no+'\',this.innerText.trim())" style="min-height:18px;outline:none;font-size:11.5px;color:#8a6410" title="클릭해서 직접 입력">'+_lfEsc(_lfN(set,r)||'—')+'</div>';
       body+='<tr>'
         +'<td style="'+TD+';color:#a9b3c1;font-size:11px">'+r.no+'</td>'
         +'<td style="'+TD+'">'+_lfEsc(r.sheet)+(r.anchor&&r.anchor!=='—'?'<span style="display:block;color:#788699;font-size:10.5px;margin-top:3px">조항키 '+_lfEsc(r.anchor)+'</span>':'')+'</td>'
@@ -2100,32 +2152,39 @@
         +'<td style="'+TD+';font-size:11.5px">'+lawLink+joLink+'<span style="display:block;color:#788699;font-size:10.5px;margin-top:3px">'+_lfEsc(r.src)+'</span></td>'
         +'<td style="'+TD+'">'+_lfEsc(r.req)+full+'</td>'
         +'<td style="'+TD+'">'+_lfEsc(r.doc)+'</td>'
-        +'<td style="'+TD+'"><span style="padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+v[0]+';color:'+v[1]+'">'+_lfEsc(v[2])+'</span></td>'
-        +'<td style="'+TD+';font-size:11.5px;color:#8a6410;background:#fffdf6">'+_lfEsc(r.note||'—')+'</td></tr>';
+        +'<td style="'+TD+'">'+sel+'</td>'
+        +'<td style="'+TD+';background:#fffdf6">'+note+'</td></tr>';
     });
     if(!body)body='<tr><td colspan="8" style="padding:22px;text-align:center;color:#788699">해당 조건의 항목이 없습니다.</td></tr>';
-    var pills=['일치','보완필요','확인필요','누락(법령기준)'].map(function(k){var v=_LFV[k];return '<span style="padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+v[0]+';color:'+v[1]+'">'+v[2]+' '+(c[k]||0)+'</span>';}).join(' ');
+    var pills=_LFOPTS.filter(function(k){return c[k];}).map(function(k){var v=_LFV[k];return '<span style="padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+v[0]+';color:'+v[1]+'">'+v[2]+' '+c[k]+'</span>';}).join(' ');
     var secBtns=(D.sheets||[]).filter(function(s){return set.rows.some(function(r){return r.sheet===s;});}).map(function(s){
       return '<button onclick="_lfPick(\''+s+'\')" style="'+(_lfSel===s?BTNON:BTN)+';font-size:11px;padding:3px 9px">'+_lfEsc(s)+'</button>';}).join(' ');
     var head='<div style="display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid #dfe5ed;padding-bottom:10px;margin-bottom:10px">'
       +'<div style="flex:1;text-align:left"><h3 style="margin:0;font-size:15px">⚖ '+_lfEsc(set.id)+' '+_lfEsc(set.title)+' <span style="font-size:12px;color:#788699;font-weight:400">법규정합성 (현행 법령 ↔ 지침서)</span></h3>'
       +'<div style="display:grid;grid-template-columns:64px 1fr;row-gap:3px;column-gap:10px;font-size:11.5px;margin-top:6px;color:#243244">'
       +'<span style="color:#788699">문서</span><span>'+_lfEsc(set.rev||'')+' · 섹션분할 워크북 기준</span>'
-      +'<span style="color:#788699">검증</span><span>국가법령정보 OPEN API(OC='+_lfEsc(D.oc||'')+') · '+_lfEsc(D.stamp||'')+'</span>'
+      +'<span style="color:#788699">검증</span><span>국가법령정보 OPEN API · '+_lfEsc(D.stamp||'')+' <span style="color:#788699">(판정은 담당자가 수정 가능)</span></span>'
       +'<span style="color:#788699">대조</span><span>항목 '+set.rows.length+'건 · 조치필요 '+act+'건</span></div></div>'
       +'<div style="text-align:right"><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">'+pills+'</div>'
       +'<div style="margin-top:8px"><button onclick="openDoc(\''+set.id+'\')" style="'+BTN+'">원본 열기 ↗</button> <button onclick="_lfClose()" style="'+BTN+'">닫기 ✕</button></div></div></div>';
     var bar='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:9px">'
       +'<button onclick="_lfSetF(false)" style="'+(!_lfActOnly?BTNON:BTN)+'">전체 '+set.rows.length+'</button>'
       +'<button onclick="_lfSetF(true)" style="'+(_lfActOnly?BTNON:BTN)+'">조치필요만 '+act+'</button>'
-      +'<span style="color:#788699;font-size:11px;margin-left:6px">섹션 필터:</span>'+secBtns+'</div>';
-    var tbl='<div style="border:1px solid #dfe5ed;border-radius:9px;overflow:auto;max-height:58vh"><table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px">'
-      +'<colgroup><col style="width:34px"><col style="width:168px"><col style="width:128px"><col style="width:158px"><col><col style="width:206px"><col style="width:92px"><col style="width:160px"></colgroup>'
-      +'<tr><th style="'+TH+'">No</th><th style="'+TH+'">섹션(시트)</th><th style="'+TH+'">항목</th><th style="'+TH+'">관련 법령 · 조항</th><th style="'+TH+'">현행 법 요구사항</th><th style="'+TH+'">지침서 반영</th><th style="'+TH+'">판정</th><th style="'+TH+'">조치</th></tr>'+body+'</table></div>';
-    var cur2='<div style="margin-top:11px;border:1px solid #dfe5ed;border-radius:9px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:11.5px">'
+      +'<button onclick="_lfExport()" style="'+BTN+'" title="내가 확정한 판정을 파일로 내보내 전체 반영">💾 확정본 내보내기</button>'
+      +'<button onclick="_lfReset(\''+set.id+'\')" style="'+BTN+';color:#8a94a3">↩ 내 판정 초기화</button>'
+      +'<span style="color:#788699;font-size:11px;margin-left:6px">섹션:</span>'+secBtns+'</div>';
+    var tbl='<div style="border:1px solid #dfe5ed;border-radius:9px;overflow:auto;max-height:56vh"><table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px">'
+      +'<colgroup><col style="width:34px"><col style="width:168px"><col style="width:128px"><col style="width:158px"><col><col style="width:200px"><col style="width:104px"><col style="width:164px"></colgroup>'
+      +'<tr><th style="'+TH+'">No</th><th style="'+TH+'">섹션(시트)</th><th style="'+TH+'">항목</th><th style="'+TH+'">관련 법령 · 조항</th><th style="'+TH+'">현행 법 요구사항</th><th style="'+TH+'">지침서 반영</th><th style="'+TH+'">판정 ✎</th><th style="'+TH+'">조치 ✎</th></tr>'+body+'</table></div>';
+    var curBody=_lfCurOpen?('<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
       +'<tr><th style="'+TH+'">법령 (API 조회)</th><th style="'+TH+'">법령일련번호(MST)</th><th style="'+TH+'">현행 시행일</th></tr>'
       +(D.currency||[]).map(function(x){return '<tr><td style="'+TD+'">'+_lfEsc(x[0])+'</td><td style="'+TD+'">'+_lfEsc(x[1])+'</td><td style="'+TD+'"><b>'+_lfEsc(x[2])+'</b></td></tr>';}).join('')
-      +'</table></div><div style="font-size:10.5px;color:#788699;margin-top:7px;text-align:left">※ 시행일 = lawSearch.do 현행 스냅샷 · 요구사항 = lawService.do&amp;JO= 조문 원문. 갱신 시 시행일이 바뀐 법령의 행을 재검토합니다.</div>';
+      +'</table>'):'';
+    var cur2='<div style="margin-top:11px;border:1px solid #dfe5ed;border-radius:9px;overflow:hidden">'
+      +'<div onclick="_lfToggleCur()" style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:#f7f9fc;cursor:pointer;font-size:11.5px;color:#243244;text-align:left">'
+      +'<b>⚖ 법령 현행성 '+((D.currency||[]).length)+'건</b><span style="color:#788699">국가법령정보 OPEN API · '+_lfEsc(D.stamp||'')+' 조회 (전 지침서 공통)</span>'
+      +'<span style="margin-left:auto;color:#788699">'+(_lfCurOpen?'접기 ▴':'펼치기 ▾')+'</span></div>'+curBody+'</div>'
+      +'<div style="font-size:10.5px;color:#788699;margin-top:7px;text-align:left">※ 판정·조치는 이 브라우저에 저장됩니다. 다른 PC·동료와 공유하려면 <b>💾 확정본 내보내기</b>로 law_data.js를 받아 담당자에게 전달해 반영하세요.</div>';
     var m=document.getElementById('lf-ov');
     if(!m){m=document.createElement('div');m.id='lf-ov';m.style.cssText='position:fixed;inset:0;background:rgba(20,25,40,.5);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:20px 12px';m.addEventListener('click',function(e){if(e.target===m)_lfClose();});document.body.appendChild(m);}
     m._set=set;
