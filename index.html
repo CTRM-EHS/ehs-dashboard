@@ -2182,7 +2182,9 @@
     var TD='text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid #eaeef4;border-right:1px solid #eaeef4;overflow-wrap:anywhere';
     var BTN='padding:5px 11px;border:1px solid #dfe5ed;border-radius:7px;background:#fff;cursor:pointer;font-size:12px;color:#243244';
     var BTNON='padding:5px 11px;border:1px solid #22415f;border-radius:7px;background:#22415f;cursor:pointer;font-size:12px;color:#fff';
-    var order={};(D.sheets||[]).forEach(function(s,i){order[s]=i;});
+    var _seen={},_list=[];(D.sheets||[]).forEach(function(x){if(set.rows.some(function(r){return r.sheet===x;})&&!_seen[x]){_seen[x]=1;_list.push(x);}});
+    set.rows.forEach(function(r){if(!_seen[r.sheet]){_seen[r.sheet]=1;_list.push(r.sheet);}});
+    var order={};_list.forEach(function(x,i){order[x]=i;});
     var rows=set.rows.filter(function(r){return (!_lfActOnly||_lfV(set,r)!=='일치') && (!_lfSel||r.sheet===_lfSel) && (!_lfVF||_lfV(set,r)===_lfVF);});
     rows=rows.slice().sort(function(a,b){var x=(order[a.sheet]==null?99:order[a.sheet]),y=(order[b.sheet]==null?99:order[b.sheet]);return x-y||a.no-b.no;});
     var body='',cur='';
@@ -2219,12 +2221,12 @@
     var pills=_LFOPTS.filter(function(k){return c[k];}).map(function(k){var v=_LFV[k],on=(_lfVF===k);
       return '<span onclick="_lfPickV(\''+k+'\')" title="'+(on?'필터 해제':v[2]+'인 항목만 보기')+'" style="padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+v[0]+';color:'+v[1]+';cursor:pointer;border:'+(on?'2px solid '+v[1]:'2px solid transparent')+'">'+v[2]+' '+c[k]+(on?' ✕':'')+'</span>';}).join(' ');
     var vfNote=_lfVF?'<div style="font-size:10.5px;color:#788699;margin-top:5px;text-align:right">「'+((_LFV[_lfVF]||['','',_lfVF])[2])+'」 항목만 표시 중 · 배지를 다시 누르면 해제</div>':'';
-    var secBtns=(D.sheets||[]).filter(function(s){return set.rows.some(function(r){return r.sheet===s;});}).map(function(s){
+    var secBtns=_list.map(function(s){
       return '<button onclick="_lfPick(\''+s+'\')" style="'+(_lfSel===s?BTNON:BTN)+';font-size:11px;padding:3px 9px">'+_lfEsc(s)+'</button>';}).join(' ');
     var head='<div style="display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid #dfe5ed;padding-bottom:10px;margin-bottom:10px">'
       +'<div style="flex:1;text-align:left"><h3 style="margin:0;font-size:15px">⚖ '+_lfEsc(set.id)+' '+_lfEsc(set.title)+' <span style="font-size:12px;color:#788699;font-weight:400">법규정합성 (현행 법령 ↔ 지침서)</span></h3>'
       +'<div style="display:grid;grid-template-columns:64px 1fr;row-gap:3px;column-gap:10px;font-size:11.5px;margin-top:6px;color:#243244">'
-      +'<span style="color:#788699">문서</span><span>'+_lfEsc(set.rev||'')+' · 섹션분할 워크북 기준</span>'
+      +'<span style="color:#788699">문서</span><span>'+_lfEsc(set.rev||'')+' · '+_lfEsc(set.basis||'지침서 본문 기준')+'</span>'
       +'<span style="color:#788699">검증</span><span>국가법령정보 OPEN API · '+_lfEsc(D.stamp||'')+'</span>'
       +'<span style="color:#788699">대조</span><span>항목 '+set.rows.length+'건 · 조치필요 '+act+'건</span></div></div>'
       +'<div style="text-align:right"><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">'+pills+'</div>'+vfNote
