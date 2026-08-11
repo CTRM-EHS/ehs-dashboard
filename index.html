@@ -2043,7 +2043,9 @@
   function _sgStatus(sec){if(sec.same)return 'same';if(!sec.old.length)return 'new';if(!sec.new.length)return 'rem';var r=_sgRows(_sgLcs(sec.old,sec.new));for(var i=0;i<r.length;i++)if(r[i].t!=='eq')return 'chg';return 'same';}
   function singuChip(code){var s=_sgFind(code);
     if(!s)return '<span style="font-size:11px;color:#9aa4b2;white-space:nowrap;margin-right:6px">이전 개정본 없음</span>';
-    var tip=(s.oldLabel||'구')+' → '+(s.newLabel||'신');
+    var tip=(s.oldLabel||'구')+' → '+(s.newLabel||'신')+(s.sameRev?' · Rev 동일(개정 없음)':'')+(s.basis?' · 기준: '+s.basis:'');
+    if(s.changed>0&&s.sameRev){
+      return '<span onclick="event.stopPropagation();openSingu(\''+code+'\')" title="'+tip+'" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;background:#eef3fb;color:#5b7594;cursor:pointer;white-space:nowrap;margin-right:6px" onmouseover="this.style.background=\'#e2ebf8\'" onmouseout="this.style.background=\'#eef3fb\'">🔍 Rev 동일 · 차이 '+s.changed+'</span>';}
     if(s.changed>0){
       return '<span onclick="event.stopPropagation();openSingu(\''+code+'\')" title="'+tip+'" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;background:#fff3dc;color:#b9770f;cursor:pointer;white-space:nowrap;margin-right:6px" onmouseover="this.style.background=\'#ffe9bf\'" onmouseout="this.style.background=\'#fff3dc\'">🔍 신구비교 · 변경 '+s.changed+'</span>';}
     return '<span onclick="event.stopPropagation();openSingu(\''+code+'\')" title="'+tip+' · 변경 없음" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;background:#eef1f5;color:#8a94a3;cursor:pointer;white-space:nowrap;margin-right:6px" onmouseover="this.style.background=\'#e3e7ee\'" onmouseout="this.style.background=\'#eef1f5\'">🔍 신구동일</span>';}
