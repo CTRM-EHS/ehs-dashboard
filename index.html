@@ -2181,7 +2181,7 @@
         +_LFOPTS.map(function(o){return '<option value="'+o+'"'+(o===vv?' selected':'')+'>'+(_LFV[o]?_LFV[o][2]:o)+'</option>';}).join('')+'</select>';
       if(ed){
         sel+='<div style="margin-top:4px;font-size:10px;color:#2159c9">✎ 내 판정'+(chg?' <span style="color:#9aa4b2">(초안 '+((_LFV[r.verdict]||['','',r.verdict])[2])+')</span>':'')+'</div>'
-          +'<input value="'+_lfAttr(_lfR(set,r))+'" onchange="_lfSetReason(\''+set.id+'\',\''+r.no+'\',this.value)" placeholder="판정 사유" title="이렇게 판정한 이유" style="width:100%;font-size:10.5px;border:1px solid #dfe5ed;border-radius:5px;padding:2px 5px;margin-top:3px;font-family:inherit">'
+          +'<textarea rows="3" onchange="_lfSetReason(\''+set.id+'\',\''+r.no+'\',this.value)" onblur="_lfSetReason(\''+set.id+'\',\''+r.no+'\',this.value)" placeholder="판정 사유 입력" title="이렇게 판정한 이유" style="width:100%;font-size:11px;line-height:1.45;border:1px solid #dfe5ed;border-radius:6px;padding:4px 6px;margin-top:4px;font-family:inherit;resize:vertical;box-sizing:border-box">'+_lfEsc(_lfR(set,r))+'</textarea>'
           +'<a onclick="_lfRowReset(\''+set.id+'\',\''+r.no+'\')" style="display:inline-block;margin-top:4px;font-size:10px;color:#8a94a3;cursor:pointer;text-decoration:underline">↩ 원래 판정으로</a>';
       }
       var note='<div contenteditable="true" onblur="_lfSetNote(\''+set.id+'\',\''+r.no+'\',this.innerText.trim())" style="min-height:18px;outline:none;font-size:11.5px;color:#8a6410" title="클릭해서 직접 입력">'+_lfEsc(_lfN(set,r)||'—')+'</div>';
@@ -2216,7 +2216,7 @@
       +'<button onclick="_lfReset(\''+set.id+'\')" style="'+BTN+';color:#8a94a3">↩ 내 판정 초기화</button>'
       +'<span style="color:#788699;font-size:11px;margin-left:6px">섹션:</span>'+secBtns+'</div>';
     var tbl='<div style="border:1px solid #dfe5ed;border-radius:9px;overflow:auto;max-height:56vh"><table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px">'
-      +'<colgroup><col style="width:34px"><col style="width:168px"><col style="width:128px"><col style="width:158px"><col><col style="width:200px"><col style="width:104px"><col style="width:164px"></colgroup>'
+      +'<colgroup><col style="width:34px"><col style="width:160px"><col style="width:124px"><col style="width:152px"><col><col style="width:188px"><col style="width:172px"><col style="width:168px"></colgroup>'
       +'<tr><th style="'+TH+'">No</th><th style="'+TH+'">섹션(시트)</th><th style="'+TH+'">항목</th><th style="'+TH+'">관련 법령 · 조항</th><th style="'+TH+'">현행 법 요구사항</th><th style="'+TH+'">지침서 반영</th><th style="'+TH+'">판정 ✎</th><th style="'+TH+'">조치 ✎</th></tr>'+body+'</table></div>';
     var curBody=_lfCurOpen?('<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
       +'<tr><th style="'+TH+'">법령 (API 조회)</th><th style="'+TH+'">법령일련번호(MST)</th><th style="'+TH+'">현행 시행일</th></tr>'
