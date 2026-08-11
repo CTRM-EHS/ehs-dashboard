@@ -1168,7 +1168,7 @@
     out+=head('지침서 (I-EHS)');
     out+='<div style="border:1px solid var(--line);border-radius:9px;overflow:hidden">'+docHead('doc-tbl','문서번호');
     Object.keys(DOCN).forEach(function(code){ out+=docRow(code,code,DOCN[code],"openDoc('"+code+"')"); });
-    out+='</table></div><div style="font-size:10.5px;color:var(--muted);margin-top:5px">↔ 머리글의 <b>세로 경계선</b>에 커서를 올리면 파랗게 바뀝니다. 좌우 드래그로 칸 너비 조절, 더블클릭 시 초기화. · 칸별로 눌러야 할 것: <b>문서명·원본</b>=원본 열기, <b>법규정합성</b>=대조표, <b>개정 신구비교</b>=구/신 대조.</div>';
+    out+='</table></div>';
     out+=head('인증서 · ISO 문서함');
     ['인증서','ISO 14001','ISO 45001'].forEach(function(nm){ var s=itemData[nm]||{}; if(s.folder) out+=row('📁',nm,s.desc||'', open2(s.folder)); });
     out+='</div>';
