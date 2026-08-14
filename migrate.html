@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>EHS 포탈 — 데이터 이사</title>
+<style>
+  body{font-family:"Malgun Gothic",sans-serif;max-width:760px;margin:32px auto;padding:0 18px;color:#222;line-height:1.6}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:#666;font-size:13px;margin-bottom:22px}
+  .box{border:1px solid #dde3ea;border-radius:10px;padding:16px 18px;margin:14px 0;background:#fbfcfd}
+  .box h2{font-size:15px;margin:0 0 10px}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+  th,td{border:1px solid #e2e7ee;padding:5px 9px;text-align:left}
+  th{background:#f2f5f9;font-weight:600}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+  button{font-family:inherit;font-size:14px;padding:9px 18px;border-radius:7px;border:0;cursor:pointer;margin-right:8px}
+  .primary{background:#1f6feb;color:#fff}
+  .primary:disabled{background:#b9c4d2;cursor:not-allowed}
+  .ghost{background:#eef2f7;color:#333}
+  .ok{color:#1f8a4c;font-weight:600}
+  .no{color:#b3261e;font-weight:600}
+  #log{white-space:pre-wrap;font-size:12.5px;background:#fff;border:1px solid #e2e7ee;border-radius:7px;padding:10px;margin-top:10px;max-height:240px;overflow:auto;display:none}
+  .step{font-size:12px;color:#888;letter-spacing:.04em}
+</style>
+</head>
+<body>
+
+<h1>EHS 포탈 — 데이터 이사</h1>
+<div class="sub">지금 이 주소: <b id="origin"></b></div>
+
+<div class="box">
+  <div class="step">1단계</div>
+  <h2>이 주소에 저장된 내용</h2>
+  <div id="found">확인 중…</div>
+</div>
+
+<div class="box">
+  <div class="step">2단계</div>
+  <h2>파일로 내보내기</h2>
+  <p style="margin:4px 0 12px;font-size:13.5px">위 내용을 파일 하나로 저장합니다. 예전에 쓰시던 주소에서 눌러주세요.</p>
+  <button class="primary" id="btnExport">내보내기</button>
+</div>
+
+<div class="box">
+  <div class="step">3단계</div>
+  <h2>서버로 올리기</h2>
+  <p style="margin:4px 0 12px;font-size:13.5px">
+    내보낸 파일을 서버에 올립니다. <b>http://localhost:3000/데이터이사.html</b> 주소에서 눌러주세요.<br>
+    서버 상태: <span id="srv">확인 중…</span>
+  </p>
+  <input type="file" id="file" accept=".json" style="font-size:13px">
+  <div style="margin-top:12px">
+    <button class="primary" id="btnImport" disabled>서버로 올리기</button>
+    <button class="ghost" id="btnClear">기록 지우기</button>
+  </div>
+  <div id="log"></div>
+</div>
+
+<script>
+(function(){
+  var PREFIX = ['ehs_','ctr_ehs_'];
+  var SKIP = ['ehs_files_colw','ehs_doc_colw','ehs_cjc_colw'];
+  var $ = function(id){ return document.getElementById(id); };
+  $('origin').textContent = location.href.replace(/[^/]*$/,'');
+
+  function mine(k){
+    if(!k) return false;
+    if(SKIP.indexOf(k)>=0) return false;
+    for(var i=0;i<PREFIX.length;i++) if(k.indexOf(PREFIX[i])===0) return true;
+    return false;
+  }
+
+  // 1단계 — 이 주소에 뭐가 있는지
+  var data = {}, list = [];
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(!mine(k)) continue;
+      var v = localStorage.getItem(k);
+      data[k]=v; list.push({k:k, n:v?v.length:0});
+    }
+  }catch(e){}
+  list.sort(function(a,b){ return b.n-a.n; });
+
+  if(!list.length){
+    $('found').innerHTML = '<span class="no">여기에는 저장된 내용이 없습니다.</span><br>'+
+      '<span style="font-size:13px;color:#666">예전에 포탈을 열던 주소에서 이 파일을 다시 열어주세요.</span>';
+  }else{
+    var total = list.reduce(function(s,r){return s+r.n;},0);
+    var kb = total/1024;
+    var sz = kb < 100 ? kb.toFixed(1) : Math.round(kb).toLocaleString();
+    var h = '<span class="ok">'+list.length+'개 항목</span> (합계 '+sz+' KB)'+
+            '<table><tr><th>항목</th><th style="width:110px">크기</th></tr>';
+    list.forEach(function(r){
+      h += '<tr><td>'+r.k+'</td><td class="n">'+r.n.toLocaleString()+' 자</td></tr>';
+    });
+    $('found').innerHTML = h+'</table>';
+  }
+
+  // 2단계 — 내보내기
+  $('btnExport').onclick = function(){
+    if(!list.length){ alert('내보낼 내용이 없습니다.'); return; }
+    var blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var d = new Date();
+    a.download = 'EHS데이터_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  // 3단계 — 서버 확인
+  var serverOK = false;
+  if(location.protocol.indexOf('http')===0){
+    fetch('/api/health').then(function(r){ return r.ok?r.json():Promise.reject(); })
+      .then(function(j){
+        serverOK = true;
+        $('srv').innerHTML = '<span class="ok">연결됨 (현재 '+j['저장항목수']+'개 보관 중)</span>';
+        $('btnImport').disabled = false;
+      })
+      .catch(function(){ $('srv').innerHTML = '<span class="no">연결 안 됨</span>'; });
+  }else{
+    $('srv').innerHTML = '<span class="no">연결 안 됨 (파일을 직접 열었습니다)</span>';
+  }
+
+  function say(t){ var l=$('log'); l.style.display='block'; l.textContent += t+'\n'; l.scrollTop=l.scrollHeight; }
+  $('btnClear').onclick = function(){ $('log').textContent=''; $('log').style.display='none'; };
+
+  // 3단계 — 올리기
+  $('btnImport').onclick = function(){
+    var f = $('file').files[0];
+    if(!f){ alert('먼저 내보낸 파일(.json)을 선택해 주세요.'); return; }
+    var fr = new FileReader();
+    fr.onload = function(){
+      var obj;
+      try{ obj = JSON.parse(fr.result); }
+      catch(e){ alert('파일을 읽을 수 없습니다. 내보내기로 만든 파일이 맞는지 확인해 주세요.'); return; }
+      var keys = Object.keys(obj).filter(mine);
+      if(!keys.length){ alert('올릴 내용이 없습니다.'); return; }
+      if(!confirm(keys.length+'개 항목을 서버에 올립니다.\n같은 이름이 서버에 이미 있으면 덮어씁니다.\n\n계속할까요?')) return;
+
+      $('btnImport').disabled = true;
+      say('── 시작 ('+keys.length+'개) ──');
+      var done=0, fail=0;
+      (function next(i){
+        if(i>=keys.length){
+          say('── 끝 ── 성공 '+done+'개'+(fail?' / 실패 '+fail+'개':''));
+          say('이제 포탈 화면을 새로고침(Ctrl+F5) 하시면 내용이 보입니다.');
+          $('btnImport').disabled = false;
+          return;
+        }
+        var k = keys[i], v = obj[k];
+        if(typeof v !== 'string') v = JSON.stringify(v);
+        fetch('/api/kv/'+encodeURIComponent(k), {
+          method:'PUT', headers:{'Content-Type':'application/json'}, body:v
+        }).then(function(r){
+          if(r.ok){ done++; say('  올림  '+k+'  ('+v.length.toLocaleString()+' 자)'); }
+          else { fail++; say('  실패  '+k+'  (HTTP '+r.status+')'); }
+        }).catch(function(e){
+          fail++; say('  실패  '+k+'  '+e);
+        }).then(function(){ next(i+1); });
+      })(0);
+    };
+    fr.readAsText(f);
+  };
+})();
+</script>
+</body>
+</html>
